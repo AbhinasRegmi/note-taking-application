@@ -7,4 +7,48 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id Int @id @default(autoincrement())
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  email        String @unique
+  name         String
+  passwordHash String
+  
+  notes Note[]
+  
+  @@map("users")
+}
+
+model Note {
+  id Int @id @default(autoincrement())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  title String
+  content String
+  
+  userId Int
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  categories Category[] // many-to-many relationship with category
+  
+  @@map("notes")
+}
+
+model Category {
+  id Int @id @default(autoincrement())
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  name String // we have to filter with name
+  
+  notes Note[] // many-to-many relationship with note
+
+  @@index([name])
+  @@map("categories")
+}
