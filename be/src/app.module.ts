@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
 import config from 'src/common/config';
-import { PrismaModule } from 'src/modules/prisma/prisma.module';
+import { PrismaModule } from 'src/domain/prisma/prisma.module';
 
 @Module({
   imports: [
