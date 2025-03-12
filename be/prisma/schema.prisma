@@ -18,8 +18,23 @@ model User {
   passwordHash String
   
   notes Note[]
+  sessions Session[]
   
   @@map("users")
+}
+
+model Session {
+  id Int @id @default(autoincrement())
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  value String @unique
+  
+  userId Int
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
 }
 
 model Note {

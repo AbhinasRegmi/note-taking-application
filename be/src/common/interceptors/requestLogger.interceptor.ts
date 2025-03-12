@@ -19,7 +19,7 @@ export class RequestLog implements NestInterceptor {
     const controller = context.getClass();
     const handler = context.getHandler();
 
-    this.logger.log(`${ip} ${method} ${url} ${controller} ${handler}`);
+    this.logger.log(`${ip} ${method} ${url} ${controller.name} ${handler.name}`);
 
     return next.handle();
   }
