@@ -19,6 +19,7 @@ model User {
   
   notes Note[]
   sessions Session[]
+  user Category[]
   
   @@map("users")
 }
@@ -43,7 +44,8 @@ model Note {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
-  title String
+  title String @unique
+  slug String @unique
   content String
   
   userId Int
@@ -61,6 +63,9 @@ model Category {
   updatedAt DateTime @updatedAt
   
   name String // we have to filter with name
+
+  userId Int
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   notes Note[] // many-to-many relationship with note
 
