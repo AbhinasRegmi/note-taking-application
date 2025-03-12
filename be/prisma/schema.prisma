@@ -70,5 +70,6 @@ model Category {
   notes Note[] // many-to-many relationship with note
 
   @@index([name])
+  @@unique([name, userId])
   @@map("categories")
 }
