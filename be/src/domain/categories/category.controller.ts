@@ -1,4 +1,4 @@
-import { Controller, Param } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { UserT } from 'src/common/types/user.type';
@@ -15,6 +15,7 @@ export class CategoryController {
     summary: 'List all categories',
   })
   @ApiBearerAuth()
+  @Get()
   async findAll() {
     return await this.categoryService.findAll();
   }
@@ -23,6 +24,7 @@ export class CategoryController {
     summary: 'View a category',
   })
   @ApiBearerAuth()
+  @Get(':id')
   async view(@Param('id') id: string, @User() loggedUser: UserT) {
     return await this.categoryService.view();
   }
@@ -31,6 +33,7 @@ export class CategoryController {
     summary: 'Create a category',
   })
   @ApiBearerAuth()
+  @Post()
   async create() {
     return await this.categoryService.create();
   }
@@ -39,6 +42,7 @@ export class CategoryController {
     summary: 'Update a category',
   })
   @ApiBearerAuth()
+  @Patch(':id')
   async update(@Param('id') id: string, @User() loggedUser: UserT) {
     return await this.categoryService.update();
   }
@@ -47,6 +51,7 @@ export class CategoryController {
     summary: 'Delete a category',
   })
   @ApiBearerAuth()
+  @Delete(':id')
   async delete(@Param('id') id: string, @User() loggedUser: UserT) {
     return await this.categoryService.delete();
   }

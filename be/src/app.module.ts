@@ -9,6 +9,7 @@ import { UserModule } from './domain/users/users.module';
 import { SessionGuard } from './common/guards/session.guard';
 import { AuthModule } from './domain/auth/auth.module';
 import { NoteModule } from './domain/notes/note.module';
+import { CategoryModule } from './domain/categories/category.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { NoteModule } from './domain/notes/note.module';
     AuthModule,
     UserModule,
     NoteModule,
+    CategoryModule
   ],
   controllers: [],
   providers: [
