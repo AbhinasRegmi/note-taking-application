@@ -8,6 +8,7 @@ import { RequestLog } from 'src/common/interceptors/requestLogger.interceptor';
 import { UserModule } from './domain/users/users.module';
 import { SessionGuard } from './common/guards/session.guard';
 import { AuthModule } from './domain/auth/auth.module';
+import { NoteModule } from './domain/notes/note.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AuthModule } from './domain/auth/auth.module';
     // routes
     AuthModule,
     UserModule,
+    NoteModule,
   ],
   controllers: [],
   providers: [
