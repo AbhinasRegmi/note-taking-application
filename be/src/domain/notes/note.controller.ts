@@ -1,8 +1,9 @@
-import { Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { NoteService } from './note.service';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { User } from 'src/common/decorators/user.decorator';
 import { UserT } from 'src/common/types/user.type';
+import { CreateNoteDto } from './dtos/create-note.dto';
 
 @Controller({
   path: 'notes',
@@ -21,8 +22,8 @@ export class NotesController {
   @ApiOperation({ summary: 'Create a note' })
   @ApiBearerAuth()
   @Post()
-  async create(@User() loggedUser: UserT) {
-    return await this.noteService.create();
+  async create(@Body() noteDto: CreateNoteDto, @User() loggedUser: UserT) {
+    return await this.noteService.create(noteDto, loggedUser);
   }
 
   @ApiOperation({ summary: 'View a note' })

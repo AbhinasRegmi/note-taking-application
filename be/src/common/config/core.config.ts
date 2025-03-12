@@ -1,4 +1,4 @@
-import { env } from "src/common/env";
+import { env } from "src/common/utils/env";
 
 export const core = {
   port: env('DEFAULT_APP_PORT', 8000),
