@@ -44,8 +44,8 @@ model Note {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
-  title String @unique
-  slug String @unique
+  title String
+  slug String
   content String
   
   userId Int
@@ -53,6 +53,7 @@ model Note {
   
   categories Category[] // many-to-many relationship with category
   
+  @@unique([userId, slug])
   @@map("notes")
 }
 
