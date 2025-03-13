@@ -8,6 +8,8 @@ import { RequestLog } from 'src/common/interceptors/requestLogger.interceptor';
 import { UserModule } from './domain/users/users.module';
 import { SessionGuard } from './common/guards/session.guard';
 import { AuthModule } from './domain/auth/auth.module';
+import { NoteModule } from './domain/notes/note.module';
+import { CategoryModule } from './domain/categories/category.module';
 
 @Module({
   imports: [
@@ -20,6 +22,8 @@ import { AuthModule } from './domain/auth/auth.module';
     // routes
     AuthModule,
     UserModule,
+    NoteModule,
+    CategoryModule
   ],
   controllers: [],
   providers: [
@@ -33,6 +37,7 @@ import { AuthModule } from './domain/auth/auth.module';
         new ValidationPipe({
           transform: true,
           whitelist: true,
+          transformOptions: {enableImplicitConversion: true}
         }),
     },
     {
