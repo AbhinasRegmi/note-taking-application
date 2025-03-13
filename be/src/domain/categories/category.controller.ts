@@ -1,8 +1,23 @@
-import { Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpException,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { UserT } from 'src/common/types/user.type';
 import { User } from 'src/common/decorators/user.decorator';
+import { PaginationDto } from 'src/common/dtos/pagination.dto';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
+import { CategoryQuery } from './dto/query.dto';
 
 @Controller({
   path: 'categories',
@@ -16,8 +31,23 @@ export class CategoryController {
   })
   @ApiBearerAuth()
   @Get()
-  async findAll() {
-    return await this.categoryService.findAll();
+  async findAll(@Query() query: PaginationDto, @User() loggedUser: UserT) {
+    return await this.categoryService.findAll(loggedUser.userId, query);
+  }
+
+  @ApiOperation({
+    summary: 'Filter post with category',
+  })
+  @ApiBearerAuth()
+  @Get('/filter')
+  async filterWithCategory(
+    @Query() query: CategoryQuery,
+    @User() loggedUser: UserT,
+  ) {
+    return await this.categoryService.filterNotes(
+      loggedUser.userId,
+      query.categories,
+    );
   }
 
   @ApiOperation({
@@ -26,7 +56,13 @@ export class CategoryController {
   @ApiBearerAuth()
   @Get(':id')
   async view(@Param('id') id: string, @User() loggedUser: UserT) {
-    return await this.categoryService.view();
+    const category = await this.categoryService.view(+id);
+
+    if (category.userId !== loggedUser.userId) {
+      throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
+    }
+
+    return category;
   }
 
   @ApiOperation({
@@ -34,8 +70,11 @@ export class CategoryController {
   })
   @ApiBearerAuth()
   @Post()
-  async create() {
-    return await this.categoryService.create();
+  async create(
+    @Body() categoryDto: CreateCategoryDto,
+    @User() loggedUser: UserT,
+  ) {
+    return await this.categoryService.create(categoryDto, loggedUser.userId);
   }
 
   @ApiOperation({
@@ -43,8 +82,18 @@ export class CategoryController {
   })
   @ApiBearerAuth()
   @Patch(':id')
-  async update(@Param('id') id: string, @User() loggedUser: UserT) {
-    return await this.categoryService.update();
+  async update(
+    @Param('id') id: string,
+    @User() loggedUser: UserT,
+    @Body() categoryDto: UpdateCategoryDto,
+  ) {
+    const category = await this.categoryService.view(+id);
+
+    if (category.userId !== loggedUser.userId) {
+      throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
+    }
+
+    return await this.categoryService.update(categoryDto, category.id);
   }
 
   @ApiOperation({
@@ -53,7 +102,12 @@ export class CategoryController {
   @ApiBearerAuth()
   @Delete(':id')
   async delete(@Param('id') id: string, @User() loggedUser: UserT) {
-    return await this.categoryService.delete();
-  }
+    const category = await this.categoryService.view(+id);
 
+    if (category.userId !== loggedUser.userId) {
+      throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
+    }
+
+    return await this.categoryService.delete(category.id);
+  }
 }

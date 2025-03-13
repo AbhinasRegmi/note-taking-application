@@ -64,7 +64,7 @@ n."createdAt" as "createdAt",
 ) as "categories",
 ts_rank(to_tsvector(n.title|| ' ' || n.content), websearch_to_tsquery(${query.search})) as rank
 from notes n
-where to_tsvector(n.title || ' ' || n.content) @@ websearch_to_tsquery(${query.search})
+where to_tsvector(n.title || ' ' || n.content) @@ websearch_to_tsquery(${query.search}) and n."userId" = ${userId}
 order by rank desc, n."updatedAt" asc 
 limit ${query.take} 
 offset ${query.take * query.page} 
