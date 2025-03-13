@@ -5,6 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { slugify } from 'src/common/utils/slug';
 import { UpdateNoteDto } from './dtos/update-note.dto';
 import { NoteQueryDto } from './dtos/query.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class NoteService {
@@ -14,25 +15,64 @@ export class NoteService {
 
   async findAll(userId: number, query: NoteQueryDto) {
     try {
-      const response = await this.db.note.findMany({
-        where: {
-          userId,
-        },
-        include: {
-          categories: {
-            select: {
-              name: true
-            }
-          } 
-        },
-        orderBy: {
-          [query.orderBy]: query.sortOrder
-        },
-        skip: query.page * query.take,
-        take: query.take,
-      });
+      if (!query.search) {
+        const response = await this.db.note.findMany({
+          where: {
+            userId,
+          },
+          include: {
+            categories: {
+              select: {
+                name: true,
+              },
+            },
+          },
+          orderBy: {
+            [query.orderBy]: query.sortOrder,
+          },
+          skip: query.page * query.take,
+          take: query.take,
+        });
 
-      return response;
+        return response;
+      } else {
+        // according to prisma docs there is performance issue with full text search with postgres when using prisma query
+        // so i am doing a raw query here it is still sanitized by prisma to avoid injections
+        const response = await this.db.$queryRaw<
+          {
+            id: string;
+            title: string;
+            content: string;
+            slug: string;
+            rank: string;
+            categories: string[];
+          }[]
+        >(
+          Prisma.sql`
+select 
+n.id as id,
+n.title  as title,
+n.content as content,
+n.slug as slug,
+n."userId" as "userId",
+n."createdAt" as "createdAt",
+(
+  select array_agg(c.name)
+  from "_CategoryToNote" ctn
+  join categories c on c.id = ctn."A"
+  where ctn."B" = n.id
+) as "categories",
+ts_rank(to_tsvector(n.title|| ' ' || n.content), websearch_to_tsquery(${query.search})) as rank
+from notes n
+where to_tsvector(n.title || ' ' || n.content) @@ websearch_to_tsquery(${query.search})
+order by rank desc, n."updatedAt" asc 
+limit ${query.take} 
+offset ${query.take * query.page} 
+`,
+        );
+
+        return response;
+      }
     } catch (e) {
       this.logger.error(e);
 
@@ -53,9 +93,9 @@ export class NoteService {
           categories: {
             select: {
               name: true,
-            }
-          }
-        }
+            },
+          },
+        },
       });
 
       if (!response) {
@@ -87,9 +127,9 @@ export class NoteService {
           categories: {
             select: {
               name: true,
-            }
-          }
-        }
+            },
+          },
+        },
       });
 
       if (!response) {

@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsIn, IsString } from 'class-validator';
+import { IsIn, IsOptional, IsString } from 'class-validator';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 
 export class NoteQueryDto extends PaginationDto {
@@ -14,4 +14,9 @@ export class NoteQueryDto extends PaginationDto {
     enum: ['asc', 'desc']
   })
   sortOrder: string = 'asc';
+
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional()
+  search: string = '';
 }

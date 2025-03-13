@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearchPostgres"]
 }
 
 datasource db {
@@ -48,12 +49,16 @@ model Note {
   slug String
   content String
   
+  // indexing for full text search is not supported by prisma so custom implementation 
+  textsearchable_index_col Unsupported("tsvector")? @default(dbgenerated("to_tsvector(title || ' ' || content)"))
+  
   userId Int
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   categories Category[] // many-to-many relationship with category
   
   @@unique([userId, slug])
+  @@index([textsearchable_index_col], type: Gin)
   @@map("notes")
 }
 
