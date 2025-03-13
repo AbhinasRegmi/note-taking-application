@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
 import { ROUTES } from 'src/common/constants/routes.constant';
 import { LoginDto } from './dtos/login.dto';
 import { PublicRoute } from 'src/common/decorators/public.decorator';
@@ -8,6 +8,7 @@ import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { User } from 'src/common/decorators/user.decorator';
 import { UserT } from 'src/common/types/user.type';
+import { AuthQueryDto } from './dtos/auth-query.dto';
 
 @Controller({
   path: 'auth',
@@ -25,6 +26,15 @@ export class AuthController {
   @Post('/login')
   async login(@Body() loginDto: LoginDto) {
     return await this.authService.login(loginDto);
+  }
+  
+  @ApiOperation({
+    summary: 'Verify a user account',
+  })
+  @PublicRoute()
+  @Get('/verify')
+  async verifyAccount(@Query() query: AuthQueryDto){
+    return await this.authService.verifyAccount(query);
   }
 
   @ApiOperation({

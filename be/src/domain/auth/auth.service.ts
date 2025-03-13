@@ -1,4 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -10,12 +16,16 @@ import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dtos/login.dto';
 import { UserT } from 'src/common/types/user.type';
 import { randomUUID, createHash } from 'node:crypto';
+import { AuthQueryDto } from './dtos/auth-query.dto';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly db: PrismaService,
     private readonly config: ConfigService,
+    @Inject(forwardRef(() => UsersService))
+    private readonly userService: UsersService,
   ) {}
 
   async createSessionTokenFor(userId: number) {
@@ -37,12 +47,6 @@ export class AuthService {
     };
   }
 
-  async createOTP() {}
-
-  async verifyOTP() {}
-
-  async twofa() {}
-
   async createPasswordHash(password: string): Promise<string> {
     return await bcrypt.hash(password, this.config.get('auth.saltRounds'));
   }
@@ -58,12 +62,20 @@ export class AuthService {
       },
       select: {
         id: true,
+        emailVerifiedAt: true,
         passwordHash: true,
       },
     });
 
     if (!userFromDb) {
       throw InvalidCredentialsError;
+    }
+
+    if (!userFromDb.emailVerifiedAt) {
+      throw new HttpException(
+        'Please verify your account first.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const isPasswordCorrect = await this.comparePasswordHash(
@@ -78,7 +90,7 @@ export class AuthService {
     return await this.createSessionTokenFor(+userFromDb.id);
   }
 
-  async generateSignedToken(data: string, expiryInMinutes: number) {
+  generateSignedToken(data: string, expiryInMinutes: number) {
     const expiryUtc = Date.now() + expiryInMinutes * 1000 * 60;
     const stringToHash = `${data}-${expiryUtc}-${this.config.get('auth.secretKey')}`;
     const signedHash = createHash('md5')
@@ -92,11 +104,7 @@ export class AuthService {
     };
   }
 
-  async vaildateSignedToken(
-    data: string,
-    expiryUtc: string,
-    signedHash: string,
-  ) {
+  vaildateSignedToken(data: string, expiryUtc: string, signedHash: string) {
     const stringToHash = `${data}-${expiryUtc}-${this.config.get('auth.secretKey')}`;
     const newHash = createHash('md5').update(stringToHash).digest('base64url');
     const expiryDate = new Date(Number(expiryUtc));
@@ -106,6 +114,19 @@ export class AuthService {
     }
 
     return false;
+  }
+
+  async verifyAccount(query: AuthQueryDto) {
+    if (!this.vaildateSignedToken(query.data, query.expiry, query.token)) {
+      throw new HttpException('Url is no longer valid', HttpStatus.BAD_REQUEST);
+    }
+
+    await this.userService.updateVerifiedAt(+query.data, true);
+
+    return {
+      success: true,
+      message: 'Please login to gain access',
+    };
   }
 
   async logout(loggedUser: UserT) {

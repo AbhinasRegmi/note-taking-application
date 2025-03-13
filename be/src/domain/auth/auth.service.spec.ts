@@ -26,18 +26,18 @@ describe('Test the signed url generation and validation', () => {
     authService = moduleRef.get(AuthService);
   });
 
-  it('should return a hash', async () => {
+  it('should return a hash', () => {
 
-    expect(await authService.generateSignedToken('abhinas', 10)).toBeDefined();
+    expect(authService.generateSignedToken('abhinas', 10)).toBeDefined();
 
   });
 
-  it('should validate the hash', async () => {
+  it('should validate the hash', () => {
     const { data, expiryUtc, signedHash } =
-      await authService.generateSignedToken('abhinas', 10);
+      authService.generateSignedToken('abhinas', 10);
 
     expect(
-      await authService.vaildateSignedToken(data, expiryUtc, signedHash),
+      authService.vaildateSignedToken(data, expiryUtc, signedHash),
     ).toBe(true);
 
   });
