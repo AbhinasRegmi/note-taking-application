@@ -37,6 +37,7 @@ import { CategoryModule } from './domain/categories/category.module';
         new ValidationPipe({
           transform: true,
           whitelist: true,
+          transformOptions: {enableImplicitConversion: true}
         }),
     },
     {
