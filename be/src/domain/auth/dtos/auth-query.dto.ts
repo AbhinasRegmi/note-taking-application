@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsString } from 'class-validator';
+import { IsEmail, IsInt, IsString } from 'class-validator';
 
 export class AuthQueryDto {
   @IsString()
@@ -13,4 +13,11 @@ export class AuthQueryDto {
   @IsString()
   @ApiProperty()
   token: string;
+}
+
+export class AuthVerificationQueryDto {
+  @IsString()
+  @IsEmail()
+  @ApiProperty()
+  email: string;
 }

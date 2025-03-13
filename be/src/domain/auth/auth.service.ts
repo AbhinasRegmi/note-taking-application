@@ -4,6 +4,7 @@ import {
   HttpStatus,
   Inject,
   Injectable,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
@@ -16,11 +17,13 @@ import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dtos/login.dto';
 import { UserT } from 'src/common/types/user.type';
 import { randomUUID, createHash } from 'node:crypto';
-import { AuthQueryDto } from './dtos/auth-query.dto';
+import { AuthQueryDto, AuthVerificationQueryDto } from './dtos/auth-query.dto';
 import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class AuthService {
+  private logger = new Logger(AuthService.name);
+
   constructor(
     private readonly db: PrismaService,
     private readonly config: ConfigService,
@@ -114,6 +117,19 @@ export class AuthService {
     }
 
     return false;
+  }
+
+  async generateVerificationLink(email: string) {
+    // Warning: this shouldn't be called from any controller. Only from notification or other services
+    try {
+      const user = await this.userService.findOneByEmail(email);
+      const response = this.generateSignedToken(user.id.toString(), this.config.get('auth.verificationExpiryMinutes'));
+      const verificationUrl = `${this.config.get('auth.verificationLinkBaseUrl')}?token=${response.signedHash}&expiry=${response.expiryUtc}&data=${response.data}`;
+      
+      return verificationUrl; 
+    } catch (e) {
+      this.logger.error(e);
+    }
   }
 
   async verifyAccount(query: AuthQueryDto) {

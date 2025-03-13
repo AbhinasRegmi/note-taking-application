@@ -14,6 +14,20 @@ export class UsersService {
     private readonly authService: AuthService,
   ) {}
 
+  async findOneByEmail(email: string){
+    const response = await this.db.user.findFirst({
+      where: {
+        email,
+      }
+    }) 
+    
+    if(!response){
+      throw new HttpException("User not found", HttpStatus.NOT_FOUND);
+    }
+    
+    return response;
+  };
+
   async findOne(userId: number) {
     return await this.db.user.findUnique({
       where: {
@@ -34,7 +48,7 @@ export class UsersService {
           id: userId
         },
         data: {
-          emailVerifiedAt: verifyNow ? Date.now().toString() : null,
+          emailVerifiedAt: verifyNow ? new Date() : null,
         }
       });
       
