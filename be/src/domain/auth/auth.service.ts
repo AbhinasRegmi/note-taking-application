@@ -5,11 +5,11 @@ import {
   CannotLogInError,
   CannotLogOutError,
   InvalidCredentialsError,
-} from 'src/common/exceptions/auth.exceptions';
+} from '../../common/exceptions/auth.exceptions';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dtos/login.dto';
 import { UserT } from 'src/common/types/user.type';
-import { randomUUID } from 'node:crypto';
+import { randomUUID, createHash } from 'node:crypto';
 
 @Injectable()
 export class AuthService {
@@ -76,6 +76,36 @@ export class AuthService {
     }
 
     return await this.createSessionTokenFor(+userFromDb.id);
+  }
+
+  async generateSignedToken(data: string, expiryInMinutes: number) {
+    const expiryUtc = Date.now() + expiryInMinutes * 1000 * 60;
+    const stringToHash = `${data}-${expiryUtc}-${this.config.get('auth.secretKey')}`;
+    const signedHash = createHash('md5')
+      .update(stringToHash)
+      .digest('base64url');
+
+    return {
+      data,
+      expiryUtc: expiryUtc.toString(),
+      signedHash,
+    };
+  }
+
+  async vaildateSignedToken(
+    data: string,
+    expiryUtc: string,
+    signedHash: string,
+  ) {
+    const stringToHash = `${data}-${expiryUtc}-${this.config.get('auth.secretKey')}`;
+    const newHash = createHash('md5').update(stringToHash).digest('base64url');
+    const expiryDate = new Date(Number(expiryUtc));
+
+    if (newHash == signedHash && expiryDate.getTime() > Date.now()) {
+      return true;
+    }
+
+    return false;
   }
 
   async logout(loggedUser: UserT) {
