@@ -18,6 +18,8 @@ model User {
   name         String
   passwordHash String
   
+  emailVerifiedAt DateTime?
+  
   notes Note[]
   sessions Session[]
   user Category[]
@@ -50,7 +52,7 @@ model Note {
   content String
   
   // indexing for full text search is not supported by prisma so custom implementation 
-  textsearchable_index_col Unsupported("tsvector")? @default(dbgenerated("to_tsvector(title || ' ' || content)"))
+  // textsearchable_index_col Unsupported("tsvector")? @default(dbgenerated("to_tsvector(title || ' ' || content)"))
   
   userId Int
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -58,7 +60,7 @@ model Note {
   categories Category[] // many-to-many relationship with category
   
   @@unique([userId, slug])
-  @@index([textsearchable_index_col], type: Gin)
+  // @@index([textsearchable_index_col], type: Gin)
   @@map("notes")
 }
 
@@ -78,4 +80,18 @@ model Category {
   @@index([name])
   @@unique([name, userId])
   @@map("categories")
+}
+
+model SingleSignInToken {
+  id Int @id @default(autoincrement())
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  token String
+
+  
+  @@index([token])
+  @@unique([token])
+  @@map("single_sign_in_tokens")
 }

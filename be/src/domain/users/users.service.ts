@@ -13,7 +13,21 @@ export class UsersService {
     private readonly db: PrismaService,
     private readonly authService: AuthService,
   ) {}
-  
+
+  async findOneByEmail(email: string){
+    const response = await this.db.user.findFirst({
+      where: {
+        email,
+      }
+    }) 
+    
+    if(!response){
+      throw new HttpException("User not found", HttpStatus.NOT_FOUND);
+    }
+    
+    return response;
+  };
+
   async findOne(userId: number) {
     return await this.db.user.findUnique({
       where: {
@@ -26,10 +40,32 @@ export class UsersService {
       },
     });
   }
+  
+  async updateVerifiedAt(userId: number, verifyNow: boolean){
+    try{
+      const response = await this.db.user.update({
+        where: {
+          id: userId
+        },
+        data: {
+          emailVerifiedAt: verifyNow ? new Date() : null,
+        }
+      });
+      
+      if(!response){
+        throw new Error("Email verification failed.");
+      }
+      
+    }catch(e){
+      this.logger.error(e);
+      
+      throw new HttpException("Cannot update the user verification status", HttpStatus.CONFLICT);
+    }
+  }
 
   async create(userDot: CreateUserDto) {
     try {
-      return await this.db.user.create({
+      const response = await this.db.user.create({
         data: {
           email: userDot.email,
           passwordHash: await this.authService.createPasswordHash(
@@ -43,15 +79,17 @@ export class UsersService {
           name: true,
         },
       });
+      
+      // notify to send email
+      
+      return response;
     } catch (e) {
-
       this.logger.error(e.message);
       throw new HttpException(
         'Please use a different email',
         HttpStatus.CONFLICT,
       );
     }
-
   }
 
   async update(userDto: UpdateUserDto, userId: number) {
@@ -72,22 +110,21 @@ export class UsersService {
       },
     });
   }
-  
+
   async delete(userId: number) {
-    const response =  await this.db.user.delete({
+    const response = await this.db.user.delete({
       where: {
         id: userId,
       },
     });
-    
-    if(!response){
+
+    if (!response) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
-    
+
     return {
       success: true,
       message: 'User deleted',
-    }
-
+    };
   }
 }

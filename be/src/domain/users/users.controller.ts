@@ -15,13 +15,16 @@ import { UpdateUserDto } from './dtos/update-user.dto';
 import { PublicRoute } from 'src/common/decorators/public.decorator';
 import { User } from 'src/common/decorators/user.decorator';
 import { UserT } from 'src/common/types/user.type';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Controller({
   path: 'users',
   version: '1',
 })
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService, 
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   @ApiOperation({
     summary: 'Create a new user',
@@ -29,7 +32,11 @@ export class UsersController {
   @PublicRoute()
   @Post()
   async create(@Body() userDto: CreateUserDto) {
-    return await this.usersService.create(userDto);
+    const response =  await this.usersService.create(userDto);
+    
+    this.eventEmitter.emit('notification.email.verify', {email: response.email});
+    
+    return response;
   }
 
   @ApiOperation({
