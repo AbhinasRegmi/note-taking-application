@@ -1,5 +1,9 @@
+import { AppNavbar } from "@/components/app-navbar";
 import { AppSidebar } from "@/components/app-sidebar";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import {
+  SidebarInset,
+  SidebarProvider,
+} from "@/components/ui/sidebar";
 import { AuthProvider } from "@/providers/auth";
 import { ThemeProvider } from "@/providers/theme";
 import { Outlet } from "react-router";
@@ -13,10 +17,10 @@ export function BaseLayout() {
       >
         <SidebarProvider defaultOpen={true}>
           <AppSidebar />
-          <main>
-            <SidebarTrigger />
+          <SidebarInset>
+            <AppNavbar />
             <Outlet />
-          </main>
+          </SidebarInset>
         </SidebarProvider>
       </ThemeProvider>
     </AuthProvider>
