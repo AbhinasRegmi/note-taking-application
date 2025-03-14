@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearchPostgres"]
 }
 
 datasource db {
@@ -17,9 +18,27 @@ model User {
   name         String
   passwordHash String
   
+  emailVerifiedAt DateTime?
+  
   notes Note[]
+  sessions Session[]
+  user Category[]
   
   @@map("users")
+}
+
+model Session {
+  id Int @id @default(autoincrement())
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  value String @unique
+  
+  userId Int
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
 }
 
 model Note {
@@ -29,13 +48,19 @@ model Note {
   updatedAt DateTime @updatedAt
   
   title String
+  slug String
   content String
+  
+  // indexing for full text search is not supported by prisma so custom implementation 
+  // textsearchable_index_col Unsupported("tsvector")? @default(dbgenerated("to_tsvector(title || ' ' || content)"))
   
   userId Int
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   categories Category[] // many-to-many relationship with category
   
+  @@unique([userId, slug])
+  // @@index([textsearchable_index_col], type: Gin)
   @@map("notes")
 }
 
@@ -46,9 +71,27 @@ model Category {
   updatedAt DateTime @updatedAt
   
   name String // we have to filter with name
+
+  userId Int
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   notes Note[] // many-to-many relationship with note
 
   @@index([name])
+  @@unique([name, userId])
   @@map("categories")
+}
+
+model SingleSignInToken {
+  id Int @id @default(autoincrement())
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  token String
+
+  
+  @@index([token])
+  @@unique([token])
+  @@map("single_sign_in_tokens")
 }
