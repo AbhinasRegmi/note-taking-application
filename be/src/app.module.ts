@@ -10,6 +10,8 @@ import { SessionGuard } from './common/guards/session.guard';
 import { AuthModule } from './domain/auth/auth.module';
 import { NoteModule } from './domain/notes/note.module';
 import { CategoryModule } from './domain/categories/category.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { EmailModule } from './common/notifications/email/email.module';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { CategoryModule } from './domain/categories/category.module';
       load: [config],
     }),
     PrismaModule,
+    EventEmitterModule.forRoot(),
+    EmailModule,
     
     // routes
     AuthModule,

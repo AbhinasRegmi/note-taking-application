@@ -4,6 +4,15 @@ import { Resend } from 'resend';
 import { AuthService } from 'src/domain/auth/auth.service';
 import AccountVerificationEmail from './templates/verify';
 import SingleLoginEmail from './templates/single-login';
+import { OnEvent } from '@nestjs/event-emitter';
+
+function sleepSync(ms) {
+  const now = Atomics.load(new Int32Array(new SharedArrayBuffer(4)), 0);
+  while (
+    Atomics.load(new Int32Array(new SharedArrayBuffer(4)), 0) - now <
+    ms
+  ) {}
+}
 
 @Injectable()
 export class EmailService {
@@ -18,33 +27,44 @@ export class EmailService {
       this.resend = new Resend(config.get('external.resendApiKey'));
     }
   }
-  
-  async sendSingleTimeLoginLinkTo(email: string){
-   try {
-     const singleLoginLink = await this.authService.generateVerificationLink(email, 'auth.singleSignInToken');
+
+  @OnEvent('notification.email.sstlogin', {async: true})
+  async sendSingleTimeLoginLinkTo(payload: { email: string }) {
+    try {
+      const singleLoginLink = await this.authService.generateVerificationLink(
+        payload.email,
+        'auth.singleSignInToken',
+      );
 
       if (!this.config.get('auth.enableEmailNotification')) {
         this.logger.log('Your one time login link is: ' + singleLoginLink);
         return;
       }
-      
+
       await this.resend.emails.send({
         from: this.config.get('external.resendSenderEmail'),
-        to: email,
+        to: payload.email,
         subject: 'One time login link',
-        react: SingleLoginEmail({loginLink: singleLoginLink}),
+        react: SingleLoginEmail({ loginLink: singleLoginLink }),
       });
 
-      this.logger.log('One time login email has been sent to ' + email + ' from resend');
+      this.logger.log(
+        'One time login email has been sent to ' +
+          payload.email +
+          ' from resend',
+      );
       return;
-   }catch(e){
-     this.logger.error(e);
-   } 
+    } catch (e) {
+      this.logger.error(e);
+    }
   }
 
-  async sendVerificationLinkTo(email: string) {
+  @OnEvent('notification.email.verify', {async: true})
+  async sendVerificationLinkTo(payload: { email: string }) {
     try {
-      const verificationLink = await this.authService.generateVerificationLink(email);
+      const verificationLink = await this.authService.generateVerificationLink(
+        payload.email,
+      );
 
       if (!this.config.get('auth.enableEmailNotification')) {
         this.logger.log('Your verification link is: ' + verificationLink);
@@ -53,14 +73,17 @@ export class EmailService {
 
       await this.resend.emails.send({
         from: this.config.get('external.resendSenderEmail'),
-        to: email,
+        to: payload.email,
         subject: 'Verify your account',
-        react: AccountVerificationEmail({verificationLink}), 
+        react: AccountVerificationEmail({ verificationLink }),
       });
 
-      this.logger.log('Accout verification email has been sent to ' + email + ' from resend.');
+      this.logger.log(
+        'Accout verification email has been sent to ' +
+          payload.email +
+          ' from resend.',
+      );
       return;
-
     } catch (e) {
       this.logger.error(e);
     }

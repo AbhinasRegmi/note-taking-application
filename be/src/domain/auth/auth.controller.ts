@@ -11,6 +11,7 @@ import { UserT } from 'src/common/types/user.type';
 import { AuthQueryDto, AuthVerificationQueryDto } from './dtos/auth-query.dto';
 import { EmailService } from 'src/common/notifications/email/email.service';
 import { SuiteContext } from 'node:test';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Controller({
   path: 'auth',
@@ -19,6 +20,7 @@ import { SuiteContext } from 'node:test';
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   @ApiOperation({
@@ -45,7 +47,8 @@ export class AuthController {
   @PublicRoute()
   @Get('/send/sst')
   async sendSst(@Query() query: AuthVerificationQueryDto){
-    //TODO: emit event to send sst
+    
+    this.eventEmitter.emit('notification.email.sstlogin', {email: query.email});
     
     return {
       success: true,
@@ -59,7 +62,8 @@ export class AuthController {
   @PublicRoute()
   @Get('/send/verification-link')
   async send(@Query() query: AuthVerificationQueryDto) {
-    //TODO: emit event to send email
+    
+    this.eventEmitter.emit('notification.email.verify', {email: query.email});
     
     return {
       success: true,
