@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
 import { AuthService } from 'src/domain/auth/auth.service';
 import AccountVerificationEmail from './templates/verify';
+import SingleLoginEmail from './templates/single-login';
 
 @Injectable()
 export class EmailService {
@@ -16,6 +17,29 @@ export class EmailService {
     if (config.get('auth.enableEmailNotification')) {
       this.resend = new Resend(config.get('external.resendApiKey'));
     }
+  }
+  
+  async sendSingleTimeLoginLinkTo(email: string){
+   try {
+     const singleLoginLink = await this.authService.generateVerificationLink(email, 'auth.singleSignInToken');
+
+      if (!this.config.get('auth.enableEmailNotification')) {
+        this.logger.log('Your one time login link is: ' + singleLoginLink);
+        return;
+      }
+      
+      await this.resend.emails.send({
+        from: this.config.get('external.resendSenderEmail'),
+        to: email,
+        subject: 'One time login link',
+        react: SingleLoginEmail({loginLink: singleLoginLink}),
+      });
+
+      this.logger.log('One time login email has been sent to ' + email + ' from resend');
+      return;
+   }catch(e){
+     this.logger.error(e);
+   } 
   }
 
   async sendVerificationLinkTo(email: string) {
@@ -34,7 +58,7 @@ export class EmailService {
         react: AccountVerificationEmail({verificationLink}), 
       });
 
-      this.logger.log('Email has been sent to ' + email + ' from resend.');
+      this.logger.log('Accout verification email has been sent to ' + email + ' from resend.');
       return;
 
     } catch (e) {

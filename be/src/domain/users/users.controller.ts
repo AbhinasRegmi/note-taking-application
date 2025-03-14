@@ -29,7 +29,10 @@ export class UsersController {
   @PublicRoute()
   @Post()
   async create(@Body() userDto: CreateUserDto) {
-    return await this.usersService.create(userDto);
+    const response =  await this.usersService.create(userDto);
+    
+    //TODO: emit even to send email
+    return response;
   }
 
   @ApiOperation({

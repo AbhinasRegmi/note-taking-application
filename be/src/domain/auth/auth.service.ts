@@ -111,6 +111,8 @@ export class AuthService {
     const stringToHash = `${data}-${expiryUtc}-${this.config.get('auth.secretKey')}`;
     const newHash = createHash('md5').update(stringToHash).digest('base64url');
     const expiryDate = new Date(Number(expiryUtc));
+    
+    
 
     if (newHash == signedHash && expiryDate.getTime() > Date.now()) {
       return true;
@@ -118,23 +120,50 @@ export class AuthService {
 
     return false;
   }
-
-  async generateVerificationLink(email: string) {
+  
+  async generateVerificationLink(email: string, baseConfigUrl: string = 'auth.verificationLinkBaseUrl') {
     // Warning: this shouldn't be called from any controller. Only from notification or other services
     try {
       const user = await this.userService.findOneByEmail(email);
-      const response = this.generateSignedToken(user.id.toString(), this.config.get('auth.verificationExpiryMinutes'));
-      const verificationUrl = `${this.config.get('auth.verificationLinkBaseUrl')}?token=${response.signedHash}&expiry=${response.expiryUtc}&data=${response.data}`;
-      
-      return verificationUrl; 
+      const response = this.generateSignedToken(
+        user.id.toString(),
+        this.config.get('auth.verificationExpiryMinutes'),
+      );
+      const verificationUrl = `${this.config.get(baseConfigUrl)}?token=${response.signedHash}&expiry=${response.expiryUtc}&data=${response.data}`;
+
+      await this.db.singleSignInToken.create({
+        data: {
+          token: response.signedHash,
+        },
+      });
+
+      return verificationUrl;
     } catch (e) {
       this.logger.error(e);
+
+      throw new HttpException(
+        'Cannot generate verification link',
+        HttpStatus.CONFLICT,
+      );
     }
   }
 
   async verifyAccount(query: AuthQueryDto) {
     if (!this.vaildateSignedToken(query.data, query.expiry, query.token)) {
       throw new HttpException('Url is no longer valid', HttpStatus.BAD_REQUEST);
+    }
+    
+    const response = this.db.singleSignInToken.delete({
+      where: {
+        token: query.token, 
+      }
+    });
+    
+    if(!response){
+      return {
+        success: false,
+        message: 'Token already used. Please generate a new one.',
+      }
     }
 
     await this.userService.updateVerifiedAt(+query.data, true);
@@ -143,6 +172,21 @@ export class AuthService {
       success: true,
       message: 'Please login to gain access',
     };
+  }
+  
+  async loginSst(query: AuthQueryDto){
+    const response = await this.verifyAccount(query);
+    
+    if(response.success){
+      const session = await this.createSessionTokenFor(+query.data);
+      
+      return {
+        success: true,
+        value: session,
+      };
+    }
+    
+    return response;
   }
 
   async logout(loggedUser: UserT) {

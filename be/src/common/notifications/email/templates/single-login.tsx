@@ -12,30 +12,29 @@ import {
 } from '@react-email/components';
 import * as React from 'react';
 
-interface VerifyEmailProps {
-  verificationLink?: string;
+interface OneTimeLoginProps {
+  loginLink?: string;
 }
 
-export default function AccountVerificationEmail({
-  verificationLink,
-}: VerifyEmailProps) {
+export default function SingleLoginEmail({
+  loginLink,
+}: OneTimeLoginProps) {
   return (
     <Html>
       <Head />
       <Body style={main}>
-        <Preview>Note Taking Application Email Verification</Preview>
+        <Preview>Note Taking Application One Time Login Link</Preview>
         <Container style={container}>
           <Section style={coverSection}>
             <Section style={imageSection}></Section>
             <Section style={upperSection}>
-              <Heading style={h1}>Verify your email address</Heading>
+              <Heading style={h1}>One Time Login Link</Heading>
               <Text style={mainText}>
-                Thank you for creating an account with The Note Taking
-                Application
+                Please use the link below to login to note taking application. This link can only be used once.
               </Text>
               <Section style={verificationSection}>
-                <Button style={buttonStyle} href={verificationLink}>
-                  Verify your Account
+                <Button style={buttonStyle} href={loginLink}>
+                  Login
                 </Button>
                 <Text style={validityText}>
                   (This link is valid for 10 minutes)
@@ -45,8 +44,7 @@ export default function AccountVerificationEmail({
             <Hr />
             <Section style={lowerSection}>
               <Text style={cautionText}>
-                Thank you for using the note taking application. If you haven't
-                created an accout with us you can ignore this link.
+                Thank you for using the note taking application.
               </Text>
             </Section>
           </Section>

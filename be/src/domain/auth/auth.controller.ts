@@ -10,6 +10,7 @@ import { User } from 'src/common/decorators/user.decorator';
 import { UserT } from 'src/common/types/user.type';
 import { AuthQueryDto, AuthVerificationQueryDto } from './dtos/auth-query.dto';
 import { EmailService } from 'src/common/notifications/email/email.service';
+import { SuiteContext } from 'node:test';
 
 @Controller({
   path: 'auth',
@@ -21,21 +22,45 @@ export class AuthController {
   ) {}
 
   @ApiOperation({
-    summary: 'Login a existing user',
+    summary: 'Login a existing user with email and password',
   })
   @PublicRoute()
   @Post('/login')
   async login(@Body() loginDto: LoginDto) {
     return await this.authService.login(loginDto);
   }
+  
+  @ApiOperation({
+    summary: 'Login a existing user with sst url',
+  })
+  @PublicRoute()
+  @Get('/login/sst')
+  async loginSst(@Query() query: AuthQueryDto){
+    return await this.authService.loginSst(query);
+  }
+  
+  @ApiOperation({
+    summary: 'Generate a temporary sst url for login'
+  })
+  @PublicRoute()
+  @Get('/send/sst')
+  async sendSst(@Query() query: AuthVerificationQueryDto){
+    //TODO: emit event to send sst
+    
+    return {
+      success: true,
+      message: 'Single time login link has been sent to the given email address.',
+    };
+  }
 
   @ApiOperation({
-    summary: 'Generate a verification link',
+    summary: 'Generate a verification link for user account',
   })
   @PublicRoute()
   @Get('/send/verification-link')
   async send(@Query() query: AuthVerificationQueryDto) {
-    // emit event to send link
+    //TODO: emit event to send email
+    
     return {
       success: true,
       message: 'Verification link has been sent to the given email address.',
@@ -43,7 +68,7 @@ export class AuthController {
   }
 
   @ApiOperation({
-    summary: 'Verify a user account',
+    summary: 'Verify a user account from verification link',
   })
   @PublicRoute()
   @Get('/verify')
