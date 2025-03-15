@@ -55,6 +55,10 @@ export function AuthProvider(props: PropsWithChildren) {
       navigate(ROUTES.backend.endpoints.login_POST);
     }
   }, [query.data, navigate]);
+  
+  if(query.isLoading){
+    return <div>loading...</div>
+  }
 
   return (
     <AuthContext.Provider

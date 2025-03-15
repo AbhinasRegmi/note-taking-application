@@ -5,7 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {z} from 'zod';
+import { z } from "zod";
 import { Center } from "@/components/ui/center";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,11 +20,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router";
 
 export function LoginPage() {
   return (
     <Center>
-      <div className="w-1/3">
+      <div className="w-full max-w-sm">
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Login</CardTitle>
@@ -78,7 +79,17 @@ function LoginForm() {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>
+                <div className="flex justify-between items-center w-full">
+                  <span>Password</span>
+                  <Link
+                    to={"/auth/forgot-password"}
+                    className="text-xs underline"
+                  >
+                    Forgot password
+                  </Link>
+                </div>
+              </FormLabel>
               <FormControl>
                 <Input placeholder="**************" {...field} />
               </FormControl>
@@ -88,9 +99,16 @@ function LoginForm() {
           )}
         />
 
-        <Button type="submit" size={"lg"}>
+        <Button type="submit" className="w-full">
           Login
         </Button>
+
+        <div className="text-center text-sm">
+          Don&apos;t have an account?{" "}
+          <Link to={"/auth/signup"} className="underline font-semibold">
+            Sign up
+          </Link>
+        </div>
       </form>
     </Form>
   );

@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router";
 
 export function ForgotPassword() {
   return (
@@ -72,9 +73,15 @@ function ForgotPasswordForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" size={"lg"}>
+        <Button type="submit" className="w-full">
           Send Login Link
         </Button>
+
+        <div className="text-center text-sm">
+          <Link to={"/auth/login"} className="underline font-semibold">
+            Go to login ?
+          </Link>
+        </div>
       </form>
     </Form>
   );

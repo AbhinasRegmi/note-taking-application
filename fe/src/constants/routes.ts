@@ -8,4 +8,4 @@ export const ROUTES = {
       profile_GET: '/users/profile',
     }
   }
-};
+} as const;
