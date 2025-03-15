@@ -1,3 +1,10 @@
+import { TakeNote } from "@/components/notes/take";
+
 export function HomePage() {
-  return <div>hello world</div>;
+  return (
+    <section>
+      <TakeNote />
+      <div>other stuff...</div>
+    </section>
+  );
 }

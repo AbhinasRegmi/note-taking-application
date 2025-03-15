@@ -56,7 +56,7 @@ export function ForgotPassword() {
       setTimeout(() => {
         toast.error("Success!", {
           description: smessage,
-        });
+        })
       }, 0);
     }
   }, [token, emessage, smessage]);
