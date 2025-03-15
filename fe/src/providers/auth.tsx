@@ -54,8 +54,6 @@ export function AuthProvider(props: PropsWithChildren) {
   });
 
   useEffect(() => {
-    console.log('inside');
-
     if (query.isError && !query.isLoading) {
       navigate(ROUTES.backend.endpoints.login_POST);
     }

@@ -20,9 +20,28 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
+import { useLocalStorage } from "@/hooks/use-localStorage";
+import { useEffect } from "react";
+import { ROUTES } from "@/constants/routes";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export function ForgotPassword() {
+  const navigate = useNavigate();
+  const [_, setLocalStorage] = useLocalStorage(
+    "note-taking-app-session-key",
+    ""
+  );
+  const { token } = useParams();
+
+  useEffect(() => {
+    if (token) {
+      setLocalStorage(token);
+      navigate("/");
+    }
+  }, [token]);
+
   return (
     <Center>
       <div className="w-1/3">
@@ -47,18 +66,59 @@ const loginFormSchema = z.object({
   email: z.string().email(),
 });
 
+async function LoginUser(data: { email: string }) {
+  try {
+    const response = await fetch(
+      `${ROUTES.backend.baseUrl}/auth/send/sst?email=${data.email}`,
+      {
+        method: "GET",
+      }
+    );
+
+    const body = await response.json();
+
+    if (response.status === 200) {
+      return {
+        message: body.message,
+      };
+    }
+
+    throw "Please try again";
+  } catch (e) {
+    if (typeof e === "string") {
+      throw e;
+    }
+
+    throw "Please try again.";
+  }
+}
+
 function ForgotPasswordForm() {
   const form = useForm<z.infer<typeof loginFormSchema>>({
     resolver: zodResolver(loginFormSchema),
   });
 
-  function onSubmit(values: z.infer<typeof loginFormSchema>) {
-    console.log(values);
-  }
+  const mutation = useMutation({
+    mutationFn: LoginUser,
+    onSuccess: () => {
+      form.reset({email: ''});
+      toast.success("Success!", {
+        description: "Single Use Login link has been sent to the given email."
+      })
+    },
+    onError: (error: string) => {
+      toast.error("Uh Oh! Something went wrong", {
+        description: error,
+      });
+    },
+  });
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form
+        onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
+        className="space-y-8"
+      >
         <FormField
           control={form.control}
           name="email"
