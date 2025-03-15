@@ -25,9 +25,10 @@ import {
   DialogTrigger,
 } from "@radix-ui/react-dialog";
 import { toast } from "sonner";
+import { searchCategories } from "@/requests/categories";
 
 export function TakeNote() {
-  const [isTakingNote, setIsTakingNote] = useState(true);
+  const [isTakingNote, setIsTakingNote] = useState(false);
 
   return (
     <section>
@@ -273,33 +274,6 @@ function NoteCreateDropdown(props: {
   );
 }
 
-async function searchCategories(search: string, session: string) {
-  try {
-    const response = await fetch(
-      `${ROUTES.backend.baseUrl}/categories?search=${search}&take=20`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${session}`,
-        },
-      }
-    );
-
-    const body = await response.json();
-
-    if (response.status !== 200) {
-      throw "Cannot search";
-    }
-
-    return body as Record<"name", string>[];
-  } catch (e) {
-    if (typeof e == "string") {
-      throw e;
-    }
-    throw "Something went wrong";
-  }
-}
-
 interface addCategoriesProps {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -348,11 +322,12 @@ function AddCategories({ cat, setCat, open, setOpen }: addCategoriesProps) {
           />
         </form>
         <section className="w-full max-w-sm mx-auto pt-4">
-          {query.data?.map((i) => (
-            <span key={i.name} className="px-2 inline-block py-1">
-              <Badge>{i.name}</Badge>
-            </span>
-          ))}
+          {search !== "" &&
+            query.data?.map((i) => (
+              <span key={i.name} className="px-2 inline-block py-1">
+                <Badge>{i.name}</Badge>
+              </span>
+            ))}
 
           {search !== "" && (
             <section className="text-xs text-center">
