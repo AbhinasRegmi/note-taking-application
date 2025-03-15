@@ -20,18 +20,20 @@ async function getUserProfile(session: string) {
   try {
     if (!session) throw new Error("No session available");
 
-    const response = await fetch(ROUTES.backend.endpoints.profile_GET, {
+    const response = await fetch(`${ROUTES.backend.baseUrl}/users/profile`, {
+      method: "GET",
       headers: {
         Authorization: `Bearer ${session}`,
       },
     });
 
-    if (response.status === 201) {
-      const { id, email, name } = await response.json();
+    const data = await response.json();
+
+    if (response.status === 200) {
       return {
-        id,
-        name,
-        email,
+        id: data.id,
+        name: data.name,
+        email: data.email,
         session,
       };
     } else {
@@ -48,20 +50,23 @@ export function AuthProvider(props: PropsWithChildren) {
   const query = useQuery({
     queryKey: ["login-provider"],
     queryFn: () => getUserProfile(session),
+    retry: false,
   });
 
   useEffect(() => {
-    if (!query.data?.id) {
+    console.log('inside');
+
+    if (query.isError && !query.isLoading) {
       navigate(ROUTES.backend.endpoints.login_POST);
     }
-  }, [query.data, navigate]);
-  
-  if(query.isLoading){
-    return <div>loading...</div>
+  }, [query.isError, navigate]);
+
+  if (query.isLoading)  {
+    return <div>loading...</div>;
   }
 
   return (
-    <AuthContext.Provider
+    !query.isError && <AuthContext.Provider
       value={{
         email: query.data?.email,
         session: query.data?.session,

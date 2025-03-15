@@ -114,7 +114,7 @@ function SignupForm() {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((data) => mutation.mutate({ ...data }))}
+        onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
         className="space-y-5"
       >
         <FormField

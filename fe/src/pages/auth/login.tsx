@@ -20,7 +20,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { ROUTES } from "@/constants/routes";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { useLocalStorage } from "@/hooks/use-localStorage";
 
 export function LoginPage() {
   return (
@@ -43,23 +47,81 @@ export function LoginPage() {
   );
 }
 
+async function LoginUser(data: { email: string; password: string }) {
+  try {
+    const response = await fetch(`${ROUTES.backend.baseUrl}/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: data.email,
+        password: data.password,
+      }),
+    });
+
+    const body = await response.json();
+
+    if (response.status == 401) {
+      throw "Please enter correct credentials";
+    }
+
+    if (response.status === 201) {
+      return {
+        ok: true,
+        token: body.token,
+      };
+    }
+
+    if (response.status === 400) {
+      throw "Please verify your account first.";
+    }
+  } catch (e) {
+    throw e;
+  }
+}
+
 const loginFormSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
 });
 
 function LoginForm() {
+  const navigate = useNavigate();
+  const [_, setSession] = useLocalStorage("note-taking-app-session-key", "");
   const form = useForm<z.infer<typeof loginFormSchema>>({
     resolver: zodResolver(loginFormSchema),
   });
 
-  function onSubmit(values: z.infer<typeof loginFormSchema>) {
-    console.log(values);
-  }
+  const mutation = useMutation({
+    mutationFn: LoginUser,
+    onSuccess: (data) => {
+      if (data?.token) {
+        console.log(data.token);
+        setSession(data.token);
+      }
+      navigate("/");
+      toast.success("User login successful.");
+    },
+    onError: (e) => {
+      let error;
+      if (typeof e === "string") {
+        error = e;
+      } else {
+        error = "Please try again later";
+      }
+      toast.error("Uh Oh! Something went wrong", {
+        description: error,
+      });
+    },
+  });
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form
+        onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
+        className="space-y-8"
+      >
         <FormField
           control={form.control}
           name="email"
