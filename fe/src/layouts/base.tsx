@@ -12,7 +12,7 @@ export function BaseLayout() {
   return (
     <AuthProvider>
       <ThemeProvider
-        defaultTheme="light"
+        defaultTheme="system"
         storageKey="note-taking-application-theme-key"
       >
         <SidebarProvider defaultOpen={true}>
