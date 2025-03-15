@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Input } from "../ui/input";
 import { Card, CardContent } from "../ui/card";
 import { z } from "zod";
@@ -74,6 +74,7 @@ function NoteForm(pros: noteFormPros) {
                 <FormItem>
                   <FormControl>
                     <Input
+                      autoFocus
                       className="shadow-none border-0 focus-visible:ring-0 dark:bg-card dark:text-card-foreground text-lg"
                       placeholder="Title"
                       {...field}
@@ -129,8 +130,10 @@ function NoteForm(pros: noteFormPros) {
 }
 
 function AddCategory() {
+  const [open, setOpen] = useState(false);
+
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger>
         <EllipsisVertical size={16} />
       </DropdownMenuTrigger>

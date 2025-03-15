@@ -4,6 +4,7 @@ import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { response } from 'express';
+import { SearchCategoryQuery } from './dto/query.dto';
 
 @Injectable()
 export class CategoryService {
@@ -44,19 +45,15 @@ export class CategoryService {
     }
   }
 
-  async findAll(userId: number, query: PaginationDto) {
+  async findAll(userId: number, query: SearchCategoryQuery) {
     try {
       const response = await this.db.category.findMany({
         where: {
           userId,
-        },
-        include: {
-          notes: {
-            select: {
-              title: true,
-              id: true,
-            },
-          },
+          name: {
+            contains: query.search,
+            mode: 'insensitive',
+          }
         },
         skip: query.page * query.take,
         take: query.take,
