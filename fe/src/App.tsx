@@ -27,7 +27,7 @@ export default function App() {
               <Route path="/auth/signup" element={<SignupPage />} />
               <Route path="/auth/login" element={<LoginPage />} />
               <Route
-                path="/auth/forgot-password/:token?"
+                path="/auth/forgot-password"
                 element={<ForgotPassword />}
               />
             </Route>

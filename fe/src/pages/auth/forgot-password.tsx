@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import { useLocalStorage } from "@/hooks/use-localStorage";
 import { useEffect } from "react";
 import { ROUTES } from "@/constants/routes";
@@ -33,18 +33,37 @@ export function ForgotPassword() {
     "note-taking-app-session-key",
     ""
   );
-  const { token } = useParams();
+  const [params, __] = useSearchParams();
+  const token = params.get("token");
+  const emessage = params.get("emessage");
+  const smessage = params.get("smessage");
 
   useEffect(() => {
     if (token) {
       setLocalStorage(token);
       navigate("/");
     }
-  }, [token]);
+
+    if (emessage) {
+      setTimeout(() => {
+        toast.error("Uh! Oh something went wrong", {
+          description: emessage,
+        });
+      }, 0);
+    }
+
+    if (smessage) {
+      setTimeout(() => {
+        toast.error("Success!", {
+          description: smessage,
+        });
+      }, 0);
+    }
+  }, [token, emessage, smessage]);
 
   return (
     <Center>
-      <div className="w-1/3">
+      <div className="w-full max-w-sm">
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Forgot Password</CardTitle>
@@ -101,10 +120,10 @@ function ForgotPasswordForm() {
   const mutation = useMutation({
     mutationFn: LoginUser,
     onSuccess: () => {
-      form.reset({email: ''});
+      form.reset({ email: "" });
       toast.success("Success!", {
-        description: "Single Use Login link has been sent to the given email."
-      })
+        description: "Single Use Login link has been sent to the given email.",
+      });
     },
     onError: (error: string) => {
       toast.error("Uh Oh! Something went wrong", {
