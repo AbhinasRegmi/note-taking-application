@@ -4,7 +4,8 @@ export const ROUTES = {
     endpoints: {
       signup_POST: '/auth/signup',
       login_POST: '/auth/login',
-      logout_GET: '/auth/logout'
+      logout_GET: '/auth/logout',
+      profile_GET: '/users/profile',
     }
   }
 };

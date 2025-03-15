@@ -1,4 +1,8 @@
-import { createContext, PropsWithChildren, useContext } from "react";
+import { ROUTES } from "@/constants/routes";
+import { useLocalStorage } from "@/hooks/use-localStorage";
+import { useQuery } from "@tanstack/react-query";
+import { createContext, PropsWithChildren, useContext, useEffect } from "react";
+import { useNavigate } from "react-router";
 
 interface authContextProps {
   email: string | undefined;
@@ -12,14 +16,52 @@ const initialAuthValue = {
 };
 export const AuthContext = createContext<authContextProps>(initialAuthValue);
 
+async function getUserProfile(session: string) {
+  try {
+    if (!session) throw new Error("No session available");
+
+    const response = await fetch(ROUTES.backend.endpoints.profile_GET, {
+      headers: {
+        Authorization: `Bearer ${session}`,
+      },
+    });
+
+    if (response.status === 201) {
+      const { id, email, name } = await response.json();
+      return {
+        id,
+        name,
+        email,
+        session,
+      };
+    } else {
+      throw new Error("Please login again.");
+    }
+  } catch (e) {
+    throw e;
+  }
+}
+
 export function AuthProvider(props: PropsWithChildren) {
-  //TODO: get data by login
+  const navigate = useNavigate();
+  const [session, _] = useLocalStorage("note-taking-app-session-key", "");
+  const query = useQuery({
+    queryKey: ["login-provider"],
+    queryFn: () => getUserProfile(session),
+  });
+
+  useEffect(() => {
+    if (!query.data?.id) {
+      navigate(ROUTES.backend.endpoints.login_POST);
+    }
+  }, [query.data, navigate]);
+
   return (
     <AuthContext.Provider
       value={{
-        email: "theflexdev@gmail.com",
-        session: "randomsession",
-        name: "theflexdev",
+        email: query.data?.email,
+        session: query.data?.session,
+        name: query.data?.name,
       }}
     >
       {props.children}
