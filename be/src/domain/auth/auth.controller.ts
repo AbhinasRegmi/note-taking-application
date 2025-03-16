@@ -38,18 +38,24 @@ export class AuthController {
   @PublicRoute()
   @Get('/login/sst')
   async loginSst(@Query() query: AuthQueryDto, @Res() res: Response) {
-    const response = await this.authService.loginSst(query);
     const baseUrl = this.config.get('core.frontendUrl');
+    try {
+      const response = await this.authService.loginSst(query);
 
-    if (response.success) {
+      if (response.success) {
+        return res.redirect(
+          `${baseUrl}/auth/forgot-password?token=${response.value}`,
+        );
+      }
+
       return res.redirect(
-        `${baseUrl}/auth/forgot-password?token=${response.value}`,
+        `${baseUrl}/auth/forgot-password?emessage=${response.message}`,
+      );
+    } catch {
+      return res.redirect(
+        `${baseUrl}/auth/forgot-password?emessage=Link has expired. Please try again`,
       );
     }
-
-    return res.redirect(
-      `${baseUrl}/auth/forgot-password?emessage=${response.message}`,
-    );
   }
 
   @ApiOperation({
@@ -89,16 +95,22 @@ export class AuthController {
   @PublicRoute()
   @Get('/verify')
   async verifyAccount(@Query() query: AuthQueryDto, @Res() res: Response) {
-    const response = await this.authService.verifyAccount(query);
     const baseUrl = this.config.get('core.frontendUrl');
+    try {
+      const response = await this.authService.verifyAccount(query);
 
-    if (!response.success) {
+      if (!response.success) {
+        res.redirect(
+          `${baseUrl}/auth/forgot-password?emessage=${response.message}`,
+        );
+      }
+
+      res.redirect(`${baseUrl}/auth/login`);
+    } catch {
       res.redirect(
-        `${baseUrl}/auth/forgot-password?emessage=${response.message}`,
+        `${baseUrl}/auth/forgot-password?emessage=Link has expired. Please generate a new link.`,
       );
     }
-
-    res.redirect(`${baseUrl}/auth/login`);
   }
 
   @ApiOperation({

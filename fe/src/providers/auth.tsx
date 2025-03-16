@@ -1,3 +1,4 @@
+import { LoadingSpinner } from "@/components/spinner";
 import { ROUTES } from "@/constants/routes";
 import { useLocalStorage } from "@/hooks/use-localStorage";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -102,7 +103,7 @@ export function AuthProvider(props: PropsWithChildren) {
   }
 
   if (query.isLoading) {
-    return <div>loading...</div>;
+    return <LoadingSpinner />;
   }
 
   return (

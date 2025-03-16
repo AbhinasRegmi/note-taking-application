@@ -9,11 +9,11 @@ import { Outlet } from "react-router";
 
 export function BaseLayout() {
   return (
-    <AuthProvider>
-      <ThemeProvider
-        defaultTheme="system"
-        storageKey="note-taking-application-theme-key"
-      >
+    <ThemeProvider
+      defaultTheme="system"
+      storageKey="note-taking-application-theme-key"
+    >
+      <AuthProvider>
         <RefetchProvider>
           <CategoriesProvider>
             <SidebarProvider defaultOpen={true}>
@@ -25,7 +25,7 @@ export function BaseLayout() {
             </SidebarProvider>
           </CategoriesProvider>
         </RefetchProvider>
-      </ThemeProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
