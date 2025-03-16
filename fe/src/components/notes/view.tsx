@@ -29,6 +29,7 @@ import {
 } from "../ui/tooltip";
 import { ROUTES } from "@/constants/routes";
 import { toast } from "sonner";
+import { NOTE_QUERY_KEY } from "../search/provider";
 
 interface viewNoteProps {
   id: string;
@@ -60,11 +61,11 @@ function SimpleNoteView(
   }
 ) {
   return (
-    <Card onClick={() => props.setIsEditOpen(true)} className="w-full max-w-sm">
+    <Card onClick={() => props.setIsEditOpen(true)} className="w-full max-w-xs">
       <CardHeader>
         <CardTitle className="line-clamp-1">{props.title}</CardTitle>
       </CardHeader>
-      <CardContent className="line-clamp-3">{props.content}</CardContent>
+      <CardContent className="line-clamp-3 min-h-12">{props.content}</CardContent>
       <CardFooter className="overflow-clip flex flex-wrap items-end max-h-17">
         {props.categories.map((category) => (
           <span key={category} className="inline-block p-1">
@@ -429,7 +430,7 @@ function useFormUpdate() {
     onSuccess: (e) => {
       toast.success(e.message);
       client.invalidateQueries({
-        queryKey: ["notes-key"],
+        queryKey: [NOTE_QUERY_KEY],
       });
     },
     onError: (e: string) => {
@@ -497,7 +498,7 @@ function useFormDelete() {
     onSuccess: (e) => {
       toast.success(e.message);
       client.invalidateQueries({
-        queryKey: ["notes-key"],
+        queryKey: [NOTE_QUERY_KEY],
       });
     },
     onError: (e: string) => {

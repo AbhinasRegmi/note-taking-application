@@ -1,14 +1,47 @@
+import { cn } from "@/lib/utils";
+import { useSearchQuery } from "../search/query";
 import { ViewNote } from "./view";
+import { NoteSkeletonList } from "./skeleton";
 
 export function ViewNoteList() {
+  const query = useSearchQuery();
+
+  if (query.isLoading) {
+    return <NoteSkeletonList />;
+  }
+
+  if (query.isSuccess && query.data.length < 1) {
+    return (
+      <section className="p-8 py-28">
+        <h2 className="text-3xl font-semibold tracking-wide text-center">
+          There is nothing to see right now!
+        </h2>
+      </section>
+    );
+  }
+
+  if (query.isError) {
+    return (
+      <section className="p-8 py-28">
+        <h2 className="text-3xl font-semibold tracking-wide text-center">
+          Oh! oh Please try again
+        </h2>
+      </section>
+    );
+  }
+
   return (
-    <section className="p-5">
-      <ViewNote
-        id="1"
-        title="title aljskdf this is super fdjlkajsldj ajldfjlsdajf sdfjdsl"
-        content="nnn thi si s lorem epsum sjis sjs s s s Changed the CardTitle and CardDescription components to use div instead of h3 and p to improve accessibility "
-        categories={["abhinas"]}
-      />
+    <section className="p-8">
+      <div
+        className={cn(
+          "flex flex-wrap gap-8",
+          query.isRefetching && "opacity-80"
+        )}
+      >
+        {query.data?.map((note) => (
+          <ViewNote {...note} />
+        ))}
+      </div>
     </section>
   );
 }

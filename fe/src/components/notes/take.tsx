@@ -26,6 +26,7 @@ import {
 } from "@radix-ui/react-dialog";
 import { toast } from "sonner";
 import { searchCategories } from "@/requests/categories";
+import { NOTE_QUERY_KEY } from "../search/provider";
 
 export function TakeNote() {
   const [isTakingNote, setIsTakingNote] = useState(false);
@@ -146,7 +147,7 @@ function NoteForm(props: noteFormPros) {
     onSuccess: () => {
       toast.success("New note has been added.");
       client.invalidateQueries({
-        queryKey: ["notes-key"],
+        queryKey: [NOTE_QUERY_KEY],
       });
       props.handler(false);
     },
