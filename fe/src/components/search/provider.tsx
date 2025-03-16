@@ -18,7 +18,7 @@ export const RefetchContext = createContext<refetchContextProps>({
   page: undefined,
   orderBy: undefined,
   sortOrder: undefined,
-  search: "",
+  search: undefined,
   setSearchParams: undefined,
 });
 
@@ -45,7 +45,7 @@ export function useRefetchContext() {
     setSearchParams: data.setSearchParams,
     sortOrder: data.sortOrder,
     take: data.take,
-    search: '',
+    search: data.search,
   };
 }
 

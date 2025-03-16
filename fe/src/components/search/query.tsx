@@ -15,7 +15,11 @@ type noteResponse = {
 async function searchNotes(props: searchNotesProps) {
   try {
     const response = await fetch(
-      `${ROUTES.backend.baseUrl}/notes?search=${props.search}&take=${props.take}&page=${props.page}&orderBy=${props.orderBy}&sortOrder=${props.sortOrder}`,
+      `${ROUTES.backend.baseUrl}/notes?take=${props.take}&page=${
+        props.page
+      }&orderBy=${props.orderBy}&sortOrder=${props.sortOrder}&search=${
+        props.search ?? ""
+      }`,
       {
         method: "GET",
         headers: {
@@ -27,12 +31,7 @@ async function searchNotes(props: searchNotesProps) {
     const body = await response.json();
 
     if (response.status == 200) {
-      return body.map((note: any) => ({
-        id: note.id,
-        title: note.title,
-        content: note.content,
-        categories: note.categories.map((i: any) => i.name),
-      })) as noteResponse[];
+      return body as noteResponse[];
     }
 
     if (response.status == 401) {

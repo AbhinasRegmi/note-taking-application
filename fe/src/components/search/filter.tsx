@@ -11,6 +11,7 @@ import {
 import { Button } from "../ui/button";
 import { useRefetchContext } from "./provider";
 import { useEffect, useState } from "react";
+import { Input } from "../ui/input";
 
 export function FilterNotes() {
   const data = useRefetchContext();
@@ -19,8 +20,9 @@ export function FilterNotes() {
 
   useEffect(() => {
     data.setSearchParams({
-      sortOrder: sortOrder ?? 'desc',
-      orderBy: orderBy ?? 'updatedAt'
+      search: data.search ?? "",
+      sortOrder: sortOrder ?? "desc",
+      orderBy: orderBy ?? "updatedAt",
     });
   }, [sortOrder, orderBy]);
 
@@ -52,5 +54,31 @@ export function FilterNotes() {
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+}
+
+export function SearchNotes() {
+  const data = useRefetchContext();
+  const [searchValue, setSearchValue] = useState(data.search);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      data.setSearchParams({
+        search: searchValue ?? "",
+        sortOrder: data.sortOrder,
+        orderBy: data.orderBy,
+      });
+    }, 350);
+
+    return () => clearTimeout(timeout);
+  }, [searchValue]);
+
+  return (
+    <Input
+      className="max-w-xs"
+      value={searchValue}
+      onChange={(e) => setSearchValue(e.currentTarget.value)}
+      placeholder="Search notes..."
+    />
   );
 }
