@@ -4,6 +4,7 @@ import { ViewNote } from "./view";
 import { NoteSkeletonList } from "./skeleton";
 import { PaginateNotes } from "./paginate";
 import { PropsWithChildren } from "react";
+import { SectionFullPage } from "./utils";
 
 export function ViewNoteList() {
   const query = useSearchQuery();
@@ -39,11 +40,11 @@ export function ViewNoteList() {
     <SectionFullPage>
       <div
         className={cn(
-          "flex flex-wrap gap-8",
+          "flex flex-wrap gap-8 w-full",
           query.isRefetching && "opacity-80"
         )}
       >
-        {query.data?.map((note) => (
+        {query?.data?.map((note) => (
           <ViewNote {...note} />
         ))}
       </div>
@@ -52,10 +53,3 @@ export function ViewNoteList() {
   );
 }
 
-function SectionFullPage(props: PropsWithChildren) {
-  return (
-    <div className="min-h-[80vh] flex flex-col items-center justify-between p-8">
-      {props.children}
-    </div>
-  );
-}

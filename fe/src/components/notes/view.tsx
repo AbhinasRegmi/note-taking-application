@@ -70,7 +70,7 @@ function SimpleNoteView(
         {props.content}
       </CardContent>
       <CardFooter className="overflow-clip flex flex-wrap items-end max-h-17">
-        {props.categories.map((category) => (
+        {props.categories?.map((category) => (
           <span key={category} className="inline-block p-1">
             <Badge>{category}</Badge>
           </span>
@@ -145,6 +145,7 @@ function EditNoteForm(
   });
 
   function handleUpdate(data: z.infer<typeof noteformSchema>) {
+
     updateQuery.mutate({
       id: props.id,
       ...data,

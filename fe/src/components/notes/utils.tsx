@@ -1,6 +1,6 @@
 import { useAuthContext } from "@/providers/auth";
 import { Badge } from "../ui/badge";
-import { useEffect, useRef, useState } from "react";
+import { PropsWithChildren, useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { searchCategoriesWithMissingGlobalScope } from "@/requests/categories";
 import { Input } from "../ui/input";
@@ -102,5 +102,13 @@ export function CategoryForm(props: {
         </section>
       )}
     </>
+  );
+}
+
+export function SectionFullPage(props: PropsWithChildren) {
+  return (
+    <div className="min-h-[80vh] flex flex-col items-center justify-between p-8">
+      {props.children}
+    </div>
   );
 }

@@ -8,7 +8,6 @@ import {
   useCategoriesContext,
 } from "./category";
 import { toast } from "sonner";
-import { describe } from "node:test";
 
 type searchNotesProps = {
   session: string;
@@ -176,4 +175,56 @@ export function useDeleteCategory() {
   });
 
   return mutation;
+}
+
+async function searchNoteWithCategory(props: {
+  session: string;
+  categoryName: string;
+  page: string;
+}) {
+  try {
+    const response = await fetch(
+      `${ROUTES.backend.baseUrl}/categories/filter?categories=${props.categoryName}&take=100`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${props.session}`
+        }
+      }
+    );
+
+    const body = await response.json();
+
+    if (response.status == 200) {
+      return body as {
+        title: string;
+        content: string;
+        id: string;
+        categories: string[];
+      }[];
+    }
+
+    if (response.status == 401) {
+      throw "You are not authorized.";
+    }
+
+    throw body.message ?? "Something went wrong.";
+  } catch (e) {
+    throw e;
+  }
+}
+
+export function useSearchNoteWithCategory(categoryName: string) {
+  const { session } = useAuthContext();
+  const { page } = useCategoriesContext();
+  const query = useQuery({
+    queryKey: ["search-note-with-category"],
+    queryFn: () =>
+      searchNoteWithCategory({
+        session,
+        categoryName,
+        page,
+      }),
+  });
+
+  return query;
 }
