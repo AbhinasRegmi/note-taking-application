@@ -1,7 +1,13 @@
 import React, { PropsWithChildren, useEffect, useRef, useState } from "react";
 import { useSidebar } from "../ui/sidebar";
 import { cn } from "@/lib/utils";
-import { Card, CardContent } from "../ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -54,8 +60,18 @@ function SimpleNoteView(
   }
 ) {
   return (
-    <Card onClick={() => props.setIsEditOpen(true)}>
-      <CardContent>this is card</CardContent>
+    <Card onClick={() => props.setIsEditOpen(true)} className="w-full max-w-sm">
+      <CardHeader>
+        <CardTitle className="line-clamp-1">{props.title}</CardTitle>
+      </CardHeader>
+      <CardContent className="line-clamp-3">{props.content}</CardContent>
+      <CardFooter className="overflow-clip flex flex-wrap items-end max-h-17">
+        {props.categories.map((category) => (
+          <span key={category} className="inline-block p-1">
+            <Badge>{category}</Badge>
+          </span>
+        ))}
+      </CardFooter>
     </Card>
   );
 }
@@ -427,7 +443,6 @@ function useFormUpdate() {
       toast.error("Uh! oh", {
         description: error,
       });
-
     },
   });
 
