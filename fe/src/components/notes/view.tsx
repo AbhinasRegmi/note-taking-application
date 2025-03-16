@@ -12,7 +12,7 @@ import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { Dialog, DialogContent } from "@radix-ui/react-dialog";
 import { useAuthContext } from "@/providers/auth";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { searchCategories } from "@/requests/categories";
 import { Plus, X } from "lucide-react";
 import {
@@ -21,6 +21,8 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "../ui/tooltip";
+import { ROUTES } from "@/constants/routes";
+import { toast } from "sonner";
 
 interface viewNoteProps {
   id: string;
@@ -131,8 +133,11 @@ function EditNoteForm(
     closeFormHandler: React.Dispatch<React.SetStateAction<boolean>>;
   }
 ) {
+  const { session } = useAuthContext();
   const [categoryArray, setCategoryArray] = useState(props.categories);
   const [openCategoryForm, setOpenCategoryForm] = useState(false);
+  const updateQuery = useFormUpdate();
+  const deleteQuery = useFormDelete();
 
   const form = useForm<z.infer<typeof noteformSchema>>({
     resolver: zodResolver(noteformSchema),
@@ -142,13 +147,31 @@ function EditNoteForm(
     },
   });
 
-  function handleSubmit(data: z.infer<typeof noteformSchema>) {
-    console.log(data);
+  function handleUpdate(data: z.infer<typeof noteformSchema>) {
+    updateQuery.mutate({
+      id: props.id,
+      ...data,
+      categories: categoryArray,
+      session,
+    });
   }
+
+  function handleDelete() {
+    deleteQuery.mutate({
+      id: props.id,
+      session,
+    });
+  }
+
+  useEffect(() => {
+    if (updateQuery.isSuccess || deleteQuery.isSuccess) {
+      props.closeFormHandler(false);
+    }
+  }, [updateQuery.isSuccess, deleteQuery.isSuccess, props.closeFormHandler]);
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)}>
+      <form onSubmit={form.handleSubmit(handleUpdate)}>
         <FormField
           control={form.control}
           name="title"
@@ -207,7 +230,7 @@ function EditNoteForm(
           ) : (
             <TooltipProvider>
               <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger asChild>
                   <Plus
                     className="cursor-pointer hover:bg-accent rounded-full"
                     onClick={() => setOpenCategoryForm((p) => !p)}
@@ -229,10 +252,7 @@ function EditNoteForm(
             variant={"destructive"}
             size={"sm"}
             key={"delete"}
-            onClick={() => {
-              // close the view
-              // remove mutation run
-            }}
+            onClick={handleDelete}
           >
             Delete
           </Button>
@@ -335,4 +355,149 @@ function CategoryForm(props: {
       )}
     </>
   );
+}
+
+interface updateNoteProps {
+  title: string;
+  content: string;
+  categories: string[];
+  id: string;
+  session: string;
+}
+async function updateNote(props: updateNoteProps) {
+  try {
+    const response = await fetch(
+      `${ROUTES.backend.baseUrl}/notes/${props.id}`,
+      {
+        method: "PATCH",
+
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${props.session}`,
+        },
+        body: JSON.stringify({
+          title: props.title,
+          content: props.content,
+          categories: props.categories,
+        }),
+      }
+    );
+
+    const body = await response.json();
+
+    if (response.status == 200) {
+      return {
+        ok: true,
+        message: "Your note has been updated.",
+      };
+    }
+
+    if (response.status == 409) {
+      throw "Please change the title.";
+    }
+
+    if (response.status == 401) {
+      throw "You do not have access to update this note.";
+    }
+
+    throw body.message ?? "Try again later.";
+  } catch (e) {
+    throw e;
+  }
+}
+
+function useFormUpdate() {
+  const client = useQueryClient();
+  const mutation = useMutation({
+    mutationFn: updateNote,
+    onSuccess: (e) => {
+      toast.success(e.message);
+      client.invalidateQueries({
+        queryKey: ["notes-key"],
+      });
+    },
+    onError: (e: string) => {
+      let error: string;
+      if (typeof e == "string") {
+        error = e;
+      } else {
+        error = "Please try again later";
+      }
+
+      toast.error("Uh! oh", {
+        description: error,
+      });
+
+    },
+  });
+
+  return mutation;
+}
+
+interface deleteNoteProps {
+  id: string;
+  session: string;
+}
+async function deleteNote(props: deleteNoteProps) {
+  try {
+    const response = await fetch(
+      `${ROUTES.backend.baseUrl}/notes/${props.id}`,
+      {
+        method: "DELETE",
+
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${props.session}`,
+        },
+      }
+    );
+
+    const body = await response.json();
+
+    if (response.status == 200) {
+      return {
+        ok: true,
+        message: "Your note has been deleted.",
+      };
+    }
+
+    if (response.status == 404) {
+      throw "Cannot delete the note.";
+    }
+
+    if (response.status == 401) {
+      throw "You do not have access to update this note.";
+    }
+
+    throw body.message ?? "Try again later.";
+  } catch (e) {
+    throw e;
+  }
+}
+
+function useFormDelete() {
+  const client = useQueryClient();
+  const mutation = useMutation({
+    mutationFn: deleteNote,
+    onSuccess: (e) => {
+      toast.success(e.message);
+      client.invalidateQueries({
+        queryKey: ["notes-key"],
+      });
+    },
+    onError: (e: string) => {
+      let error: string;
+      if (typeof e == "string") {
+        error = e;
+      } else {
+        error = "Please try again later";
+      }
+
+      toast.error("Uh! Oh", {
+        description: error,
+      });
+    },
+  });
+
+  return mutation;
 }
