@@ -23,6 +23,7 @@ export function FilterNotes() {
       search: data.search ?? "",
       sortOrder: sortOrder ?? "desc",
       orderBy: orderBy ?? "updatedAt",
+      page: data.page ?? 0,
     });
   }, [sortOrder, orderBy]);
 
@@ -67,6 +68,7 @@ export function SearchNotes() {
         search: searchValue ?? "",
         sortOrder: data.sortOrder,
         orderBy: data.orderBy,
+        page: data.page ?? 0,
       });
     }, 350);
 

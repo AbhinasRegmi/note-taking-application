@@ -2,6 +2,8 @@ import { cn } from "@/lib/utils";
 import { useSearchQuery } from "../search/query";
 import { ViewNote } from "./view";
 import { NoteSkeletonList } from "./skeleton";
+import { PaginateNotes } from "./paginate";
+import { PropsWithChildren } from "react";
 
 export function ViewNoteList() {
   const query = useSearchQuery();
@@ -12,11 +14,14 @@ export function ViewNoteList() {
 
   if (query.isSuccess && query.data.length < 1) {
     return (
-      <section className="p-8 py-28">
-        <h2 className="text-3xl font-semibold tracking-wide text-center">
-          There is nothing to see right now!
-        </h2>
-      </section>
+      <SectionFullPage>
+        <section className="p-8 py-28">
+          <h2 className="text-3xl font-semibold tracking-wide text-center">
+            There is nothing to see right now!
+          </h2>
+        </section>
+        <PaginateNotes />
+      </SectionFullPage>
     );
   }
 
@@ -31,7 +36,7 @@ export function ViewNoteList() {
   }
 
   return (
-    <section className="p-8">
+    <SectionFullPage>
       <div
         className={cn(
           "flex flex-wrap gap-8",
@@ -42,6 +47,15 @@ export function ViewNoteList() {
           <ViewNote {...note} />
         ))}
       </div>
-    </section>
+      <PaginateNotes />
+    </SectionFullPage>
+  );
+}
+
+function SectionFullPage(props: PropsWithChildren) {
+  return (
+    <div className="min-h-[80vh] flex flex-col items-center justify-between p-8">
+      {props.children}
+    </div>
   );
 }
