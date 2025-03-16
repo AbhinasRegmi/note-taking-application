@@ -13,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { EllipsisVertical } from "lucide-react";
+import { EllipsisVertical, Plus, X } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuthContext } from "@/providers/auth";
 import { ROUTES } from "@/constants/routes";
@@ -27,6 +27,13 @@ import {
 import { toast } from "sonner";
 import { searchCategories } from "@/requests/categories";
 import { NOTE_QUERY_KEY } from "../search/provider";
+import { CategoryBadge, CategoryForm } from "./utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
 
 export function TakeNote() {
   const [isTakingNote, setIsTakingNote] = useState(false);
@@ -139,9 +146,11 @@ interface noteFormPros {
 }
 function NoteForm(props: noteFormPros) {
   const { session } = useAuthContext();
-  const [cat, setCat] = useState<string[]>([]);
-  const [openCat, setOpenCat] = useState<boolean>(false);
+  const [categoryArray, setCategoryArray] = useState<string[]>([]);
+  const [openCategoryForm, setOpenCategoryForm] = useState(false);
+
   const client = useQueryClient();
+
   const mutation = useMutation({
     mutationFn: createNewNote,
     onSuccess: () => {
@@ -157,187 +166,122 @@ function NoteForm(props: noteFormPros) {
       });
     },
   });
+
   const form = useForm<z.infer<typeof noteformSchema>>({
     resolver: zodResolver(noteformSchema),
   });
 
   return (
-    <>
-      <Card className="py-2 px-0">
-        <CardContent className="px-0">
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit((data) =>
-                mutation.mutate({ categories: cat, ...data, session })
+    <Card className="py-2 px-0">
+      <CardContent className="px-0">
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit((data) =>
+              mutation.mutate({ categories: categoryArray, ...data, session })
+            )}
+          >
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      autoFocus
+                      className="shadow-none border-0 focus-visible:ring-0 dark:bg-card dark:text-card-foreground text-lg"
+                      placeholder="Title"
+                      {...field}
+                    />
+                  </FormControl>
+                </FormItem>
               )}
-            >
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input
-                        autoFocus
-                        className="shadow-none border-0 focus-visible:ring-0 dark:bg-card dark:text-card-foreground text-lg"
-                        placeholder="Title"
-                        {...field}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="content"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Textarea
-                        className="shadow-none border-0 focus-visible:ring-0 dark:bg-card dark:text-card-foreground"
-                        placeholder="Take a note..."
-                        {...field}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+            />
+            <FormField
+              control={form.control}
+              name="content"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Textarea
+                      className="shadow-none border-0 focus-visible:ring-0 dark:bg-card dark:text-card-foreground"
+                      placeholder="Take a note..."
+                      {...field}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
 
-              <section className="py-1 px-3">
-                {cat.map((i) => (
-                  <span key={i} className="p-1">
-                    <CatBadge catKey={i} setCat={setCat} />
+            <section className="py-4 flex items-end justify-between px-2">
+              <div className="grow shrink-0 flex flex-wrap w-3/4">
+                {categoryArray.map((category) => (
+                  <span key={category} className="p-1">
+                    <CategoryBadge
+                      categoryName={category}
+                      setCategoryArray={setCategoryArray}
+                    />
                   </span>
                 ))}
-              </section>
-
-              <div className="px-3 flex items-center justify-between">
-                <NoteCreateDropdown setOpenCat={setOpenCat} />
-
-                {form.formState.isValid ? (
-                  <Button
-                    type="submit"
-                    key="submit"
-                    size={"sm"}
-                    variant={"secondary"}
-                  >
-                    Submit
-                  </Button>
-                ) : (
-                  <Button
-                    size={"sm"}
-                    variant={"secondary"}
-                    onClick={() => props.handler(false)}
-                    type="button"
-                    key="cancel"
-                  >
-                    Cancel
-                  </Button>
-                )}
               </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
 
-      {openCat && (
-        <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm px-4">
-          <div className="p-6 rounded-lg max-w-sm w-full border">
-            <AddCategories
-              setCat={setCat}
-              cat={cat}
-              open={openCat}
-              setOpen={setOpenCat}
-            />
-          </div>
-        </div>
-      )}
-    </>
-  );
-}
-
-function NoteCreateDropdown(props: {
-  setOpenCat: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger>
-        <EllipsisVertical size={16} />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56">
-        <DropdownMenuItem onClick={() => props.setOpenCat(true)}>
-          Add Categories
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
-interface addCategoriesProps {
-  open: boolean;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  cat: string[];
-  setCat: React.Dispatch<React.SetStateAction<string[]>>;
-}
-function AddCategories({ cat, setCat, open, setOpen }: addCategoriesProps) {
-  const { session } = useAuthContext();
-  const [search, setSearch] = useState("");
-  const query = useQuery({
-    queryKey: ["searchCategories"],
-    queryFn: async () => await searchCategories(search, session),
-  });
-
-  function setUniqueCat(value: string) {
-    if (!cat.includes(value)) {
-      setCat([value, ...cat]);
-    }
-  }
-
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setUniqueCat(search);
-    setSearch("");
-  }
-
-  // debouncing the refetch
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      query.refetch();
-    }, 500);
-
-    return () => clearTimeout(handler);
-  }, [search]);
-
-  return (
-    <Dialog onOpenChange={setOpen} open={open}>
-      <DialogTrigger hidden>Add Categories</DialogTrigger>
-      <DialogContent>
-        <DialogTitle className="sr-only">Add Categories</DialogTitle>
-        <form onSubmit={handleSubmit}>
-          <Input
-            placeholder="Search categories..."
-            onChange={(e) => setSearch(e.target.value)}
-            value={search}
-          />
-        </form>
-        <section className="w-full max-w-sm mx-auto pt-4">
-          {search !== "" &&
-            query.data?.map((i) => (
-              <span key={i.name} className="px-2 inline-block py-1">
-                <Badge>{i.name}</Badge>
-              </span>
-            ))}
-
-          {search !== "" && (
-            <section className="text-xs text-center">
-              Press enter to add <strong className="text-sm">{search}</strong>{" "}
-              to note's category
+              {openCategoryForm ? (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <X
+                        className="cursor-pointer hover:bg-accent rounded-full"
+                        onClick={() => setOpenCategoryForm((p) => !p)}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>close category form</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ) : (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Plus
+                        className="cursor-pointer hover:bg-accent rounded-full"
+                        onClick={() => setOpenCategoryForm((p) => !p)}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>Add Categories</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
             </section>
-          )}
-        </section>
-      </DialogContent>
-    </Dialog>
+
+            {openCategoryForm && (
+              <div className="px-3">
+                <CategoryForm setCategoryArray={setCategoryArray} />
+              </div>
+            )}
+
+            <div className="px-3 flex items-center justify-end">
+              {form.formState.isValid ? (
+                <Button
+                  type="submit"
+                  key="submit"
+                  size={"sm"}
+                  variant={"secondary"}
+                >
+                  Submit
+                </Button>
+              ) : (
+                <Button
+                  size={"sm"}
+                  variant={"secondary"}
+                  onClick={() => props.handler(false)}
+                  type="button"
+                  key="cancel"
+                >
+                  Cancel
+                </Button>
+              )}
+            </div>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 }

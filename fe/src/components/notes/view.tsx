@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, useEffect, useRef, useState } from "react";
+import React, { PropsWithChildren, useEffect, useState } from "react";
 import { useSidebar } from "../ui/sidebar";
 import { cn } from "@/lib/utils";
 import {
@@ -18,8 +18,7 @@ import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { Dialog, DialogContent } from "@radix-ui/react-dialog";
 import { useAuthContext } from "@/providers/auth";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { searchCategories } from "@/requests/categories";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, X } from "lucide-react";
 import {
   Tooltip,
@@ -30,6 +29,7 @@ import {
 import { ROUTES } from "@/constants/routes";
 import { toast } from "sonner";
 import { NOTE_QUERY_KEY } from "../search/provider";
+import { CategoryBadge, CategoryForm } from "./utils";
 
 interface viewNoteProps {
   id: string;
@@ -65,7 +65,9 @@ function SimpleNoteView(
       <CardHeader>
         <CardTitle className="line-clamp-1">{props.title}</CardTitle>
       </CardHeader>
-      <CardContent className="line-clamp-3 min-h-12">{props.content}</CardContent>
+      <CardContent className="line-clamp-3 min-h-12">
+        {props.content}
+      </CardContent>
       <CardFooter className="overflow-clip flex flex-wrap items-end max-h-17">
         {props.categories.map((category) => (
           <span key={category} className="inline-block p-1">
@@ -114,29 +116,6 @@ function BlurWithContentAtCenter(props: PropsWithChildren) {
         {props.children}
       </div>
     </div>
-  );
-}
-
-function CategoryBadge(props: {
-  categoryName: string;
-  setCategoryArray: React.Dispatch<React.SetStateAction<string[]>>;
-}) {
-  return (
-    <Badge className="group">
-      {props.categoryName}
-      <span
-        className="hidden group-hover:block text-sm font-semibold cursor-pointer"
-        onClick={() => {
-          props.setCategoryArray((categoryArr) => {
-            return categoryArr.filter(
-              (category) => category != props.categoryName
-            );
-          });
-        }}
-      >
-        x
-      </span>
-    </Badge>
   );
 }
 
@@ -253,7 +232,7 @@ function EditNoteForm(
                     onClick={() => setOpenCategoryForm((p) => !p)}
                   />
                 </TooltipTrigger>
-                <TooltipContent>Open category form</TooltipContent>
+                <TooltipContent>Add Categories</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           )}
@@ -296,81 +275,6 @@ function EditNoteForm(
         </div>
       </form>
     </Form>
-  );
-}
-
-function CategoryForm(props: {
-  setCategoryArray: React.Dispatch<React.SetStateAction<string[]>>;
-}) {
-  const { session } = useAuthContext();
-  const [search, setSearch] = useState("");
-  const inputRef = useRef(null);
-
-  const query = useQuery({
-    queryKey: ["searchCategories"],
-    queryFn: async () => await searchCategories(search, session),
-  });
-
-  function handleSubmit(searchText: string) {
-    props.setCategoryArray((categoryArray) => {
-      if (!categoryArray.includes(searchText)) {
-        return [searchText, ...categoryArray];
-      }
-      return categoryArray;
-    });
-    setSearch("");
-  }
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      query.refetch();
-    }, 500);
-
-    return () => clearTimeout(handler);
-  }, [search]);
-
-  return (
-    <>
-      <form
-        onSubmit={(e) => e.preventDefault()}
-        onKeyDown={(e) => {
-          if (e.key == "Enter") {
-            e.preventDefault();
-            handleSubmit(search);
-          }
-        }}
-      >
-        <Input
-          ref={inputRef}
-          placeholder="Add new categories..."
-          onChange={(e) => setSearch(e.target.value)}
-          value={search}
-        />
-      </form>
-
-      <section className="w-full max-w-sm mx-auto pt-4">
-        {search !== "" &&
-          query.data?.map((i) => (
-            <span key={i.name} className="px-2 inline-block py-1 opacity-40">
-              <Badge
-                onClick={() => {
-                  handleSubmit(i.name);
-                }}
-                className="cursor-pointer"
-              >
-                {i.name}
-              </Badge>
-            </span>
-          ))}
-      </section>
-
-      {search !== "" && (
-        <section className="text-xs text-center">
-          Press enter to add <strong className="text-sm">{search}</strong> to
-          note's category
-        </section>
-      )}
-    </>
   );
 }
 
