@@ -1,4 +1,4 @@
-import { NavLink } from "react-router";
+import { NavLink, useLocation, useResolvedPath } from "react-router";
 import {
   Sidebar,
   SidebarContent,
@@ -19,17 +19,21 @@ const menuItems = [
     name: "Notes",
     link: "/",
     icon: Lightbulb,
+    isActive: (pathname: string) => pathname === "/",
     onclick: () => {},
   },
   {
     name: "Categories",
-    link: "/catgories",
+    link: "/categories",
     icon: Bookmark,
-    onclick: () => console.log("clicked"),
+    isActive: (pathname: string) => pathname.startsWith("/categories"),
+    onclick: () => {},
   },
 ];
 
 export function AppSidebar() {
+  const { pathname } = useLocation();
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
@@ -42,7 +46,11 @@ export function AppSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.name}>
-                  <SidebarMenuButton asChild onClick={item.onclick}>
+                  <SidebarMenuButton
+                    isActive={item.isActive(pathname)}
+                    asChild
+                    onClick={item.onclick}
+                  >
                     <NavLink to={item.link}>
                       <item.icon />
                       <span>{item.name}</span>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Input } from "../ui/input";
 import { Card, CardContent } from "../ui/card";
 import { z } from "zod";
@@ -7,26 +7,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem } from "../ui/form";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { EllipsisVertical, Plus, X } from "lucide-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Plus, X } from "lucide-react";
+import { useMutation,  useQueryClient } from "@tanstack/react-query";
 import { useAuthContext } from "@/providers/auth";
 import { ROUTES } from "@/constants/routes";
-import { Badge } from "../ui/badge";
-import { Dialog } from "../ui/dialog";
-import {
-  DialogContent,
-  DialogTitle,
-  DialogTrigger,
-} from "@radix-ui/react-dialog";
 import { toast } from "sonner";
-import { searchCategories } from "@/requests/categories";
-import { NOTE_QUERY_KEY } from "../search/provider";
+import { NOTE_QUERY_KEY } from "../search/notes";
 import { CategoryBadge, CategoryForm } from "./utils";
 import {
   Tooltip,
@@ -34,6 +20,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
+import { CATEGORY_QUERY_KEY } from "../search/category";
 
 export function TakeNote() {
   const [isTakingNote, setIsTakingNote] = useState(false);
@@ -48,33 +35,6 @@ export function TakeNote() {
         )}
       </div>
     </section>
-  );
-}
-
-function removeCategory(
-  catKey: string,
-  setCat: React.Dispatch<React.SetStateAction<string[]>>
-) {
-  setCat((i) => {
-    const result = i.filter((cat) => cat !== catKey);
-    return result;
-  });
-}
-
-function CatBadge(props: {
-  catKey: string;
-  setCat: React.Dispatch<React.SetStateAction<string[]>>;
-}) {
-  return (
-    <Badge className="group">
-      {props.catKey}
-      <span
-        className="hidden group-hover:block text-sm font-semibold cursor-pointer"
-        onClick={() => removeCategory(props.catKey, props.setCat)}
-      >
-        x
-      </span>
-    </Badge>
   );
 }
 
@@ -157,6 +117,9 @@ function NoteForm(props: noteFormPros) {
       toast.success("New note has been added.");
       client.invalidateQueries({
         queryKey: [NOTE_QUERY_KEY],
+      });
+      client.invalidateQueries({
+        queryKey: [CATEGORY_QUERY_KEY],
       });
       props.handler(false);
     },

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useRefetchContext } from "../search/provider";
+import { useRefetchContext } from "../search/notes";
 import {
   Pagination,
   PaginationContent,
@@ -24,15 +24,33 @@ export function PaginateNotes() {
   }, [pageNumber]);
 
   return (
-    <Pagination>
-      <PaginationContent>
+    <div className="pt-12">
+      <Pagination>
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious
+              onClick={() =>
+                setPageNumber((i) => {
+                  let num = Number(i);
+                  if (num > 0) {
+                    num -= 1;
+                    return num.toString();
+                  }
+
+                  return i;
+                })
+              }
+            />
+          </PaginationItem>
+          <span className="p-0.5"></span>
+        </PaginationContent>
         <PaginationItem>
-          <PaginationPrevious
+          <PaginationNext
             onClick={() =>
               setPageNumber((i) => {
                 let num = Number(i);
-                if (num > 0) {
-                  num -= 1;
+                if (num >= 0) {
+                  num += 1;
                   return num.toString();
                 }
 
@@ -41,23 +59,7 @@ export function PaginateNotes() {
             }
           />
         </PaginationItem>
-        <span className="p-0.5"></span>
-      </PaginationContent>
-      <PaginationItem>
-        <PaginationNext
-          onClick={() =>
-            setPageNumber((i) => {
-              let num = Number(i);
-              if (num >= 0) {
-                num += 1;
-                return num.toString();
-              }
-
-              return i;
-            })
-          }
-        />
-      </PaginationItem>
-    </Pagination>
+      </Pagination>
+    </div>
   );
 }

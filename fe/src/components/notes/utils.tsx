@@ -2,8 +2,9 @@ import { useAuthContext } from "@/providers/auth";
 import { Badge } from "../ui/badge";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { searchCategories } from "@/requests/categories";
+import { searchCategoriesWithMissingGlobalScope } from "@/requests/categories";
 import { Input } from "../ui/input";
+import { CATEGORY_QUERY_KEY } from "../search/category";
 
 export function CategoryBadge(props: {
   categoryName: string;
@@ -37,8 +38,8 @@ export function CategoryForm(props: {
   const inputRef = useRef(null);
 
   const query = useQuery({
-    queryKey: ["searchCategories"],
-    queryFn: async () => await searchCategories(search, session),
+    queryKey: [CATEGORY_QUERY_KEY],
+    queryFn: async () => await searchCategoriesWithMissingGlobalScope(search, session),
   });
 
   function handleSubmit(searchText: string) {
@@ -80,7 +81,7 @@ export function CategoryForm(props: {
 
       <section className="w-full max-w-sm mx-auto pt-4">
         {search !== "" &&
-          query.data?.map((i) => (
+          query.data?.map((i: {name: string}) => (
             <span key={i.name} className="px-2 inline-block py-1 opacity-40">
               <Badge
                 onClick={() => {

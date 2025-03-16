@@ -28,8 +28,9 @@ import {
 } from "../ui/tooltip";
 import { ROUTES } from "@/constants/routes";
 import { toast } from "sonner";
-import { NOTE_QUERY_KEY } from "../search/provider";
+import { NOTE_QUERY_KEY } from "../search/notes";
 import { CategoryBadge, CategoryForm } from "./utils";
+import { CATEGORY_QUERY_KEY } from "../search/category";
 
 interface viewNoteProps {
   id: string;
@@ -175,7 +176,6 @@ function EditNoteForm(
             <FormItem>
               <FormControl>
                 <Input
-                  autoFocus
                   className="shadow-none border-0 px-0 focus-visible:ring-0 dark:bg-background dark:text-foreground text-lg"
                   placeholder="Title"
                   {...field}
@@ -191,6 +191,7 @@ function EditNoteForm(
             <FormItem>
               <FormControl>
                 <Textarea
+                  autoFocus
                   className="shadow-none border-0 px-0 focus-visible:ring-0 dark:bg-background dark:text-foreground"
                   placeholder="Take a note..."
                   {...field}
@@ -335,6 +336,9 @@ function useFormUpdate() {
       toast.success(e.message);
       client.invalidateQueries({
         queryKey: [NOTE_QUERY_KEY],
+      });
+      client.invalidateQueries({
+        queryKey: [CATEGORY_QUERY_KEY],
       });
     },
     onError: (e: string) => {

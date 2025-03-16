@@ -1,6 +1,7 @@
 import { AppNavbar } from "@/components/app-navbar";
 import { AppSidebar } from "@/components/app-sidebar";
-import { RefetchProvider } from "@/components/search/provider";
+import { CategoriesProvider } from "@/components/search/category";
+import { RefetchProvider } from "@/components/search/notes";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AuthProvider } from "@/providers/auth";
 import { ThemeProvider } from "@/providers/theme";
@@ -14,13 +15,15 @@ export function BaseLayout() {
         storageKey="note-taking-application-theme-key"
       >
         <RefetchProvider>
-          <SidebarProvider defaultOpen={true}>
-            <AppSidebar />
-            <SidebarInset>
-              <AppNavbar />
-              <Outlet />
-            </SidebarInset>
-          </SidebarProvider>
+          <CategoriesProvider>
+            <SidebarProvider defaultOpen={true}>
+              <AppSidebar />
+              <SidebarInset>
+                <AppNavbar />
+                <Outlet />
+              </SidebarInset>
+            </SidebarProvider>
+          </CategoriesProvider>
         </RefetchProvider>
       </ThemeProvider>
     </AuthProvider>

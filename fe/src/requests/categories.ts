@@ -1,9 +1,9 @@
 import { ROUTES } from "@/constants/routes";
 
-export async function searchCategories(search: string, session: string) {
+export async function searchCategoriesWithMissingGlobalScope(search: string, session: string) {
   try {
     const response = await fetch(
-      `${ROUTES.backend.baseUrl}/categories?search=${search}&take=20`,
+      `${ROUTES.backend.baseUrl}/categories?search=${search}&take=15`,
       {
         method: "GET",
         headers: {

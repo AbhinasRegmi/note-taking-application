@@ -9,9 +9,10 @@ import {
   DropdownMenuRadioItem,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { useRefetchContext } from "./provider";
+import { useRefetchContext } from "./notes";
 import { useEffect, useState } from "react";
 import { Input } from "../ui/input";
+import { useLocation } from "react-router";
 
 export function FilterNotes() {
   const data = useRefetchContext();
@@ -60,6 +61,7 @@ export function FilterNotes() {
 
 export function SearchNotes() {
   const data = useRefetchContext();
+  const { pathname } = useLocation();
   const [searchValue, setSearchValue] = useState(data.search);
 
   useEffect(() => {
@@ -80,7 +82,7 @@ export function SearchNotes() {
       className="max-w-xs"
       value={searchValue}
       onChange={(e) => setSearchValue(e.currentTarget.value)}
-      placeholder="Search notes..."
+      placeholder={pathname == "/" ? "Search notes..." : "Search categories..."}
     />
   );
 }
