@@ -1,12 +1,14 @@
 import { ROUTES } from "@/constants/routes";
 import { NOTE_QUERY_KEY, searchProps, useRefetchContext } from "./notes";
 import { useAuthContext } from "@/providers/auth";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   categoriesSearchProps,
   CATEGORY_QUERY_KEY,
   useCategoriesContext,
 } from "./category";
+import { toast } from "sonner";
+import { describe } from "node:test";
 
 type searchNotesProps = {
   session: string;
@@ -114,6 +116,64 @@ export function useCategoriesQuery() {
         ...data,
       }),
   });
-  
+
   return query;
+}
+
+async function deleteCategory(props: { session: string; id: string }) {
+  try {
+    const response = await fetch(
+      `${ROUTES.backend.baseUrl}/categories/${props.id}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${props.session}`,
+        },
+      }
+    );
+
+    if (response.status == 200) {
+      return {
+        ok: true,
+      };
+    }
+
+    if (response.status == 401) {
+      throw "You are not authorized to delete this category.";
+    }
+
+    throw "Try again later.";
+  } catch (e) {
+    throw e;
+  }
+}
+
+export function useDeleteCategory() {
+  const client = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: deleteCategory,
+    onSuccess: () => {
+      toast.success("Success", {
+        description: "Category has been removed",
+      });
+      client.invalidateQueries({
+        queryKey: [CATEGORY_QUERY_KEY],
+      });
+    },
+    onError: (e) => {
+      let error;
+      if (typeof e == "string") {
+        error = e;
+      } else {
+        error = "Something went wrong. Try again later";
+      }
+
+      toast.error("Uh! oh", {
+        description: error,
+      });
+    },
+  });
+
+  return mutation;
 }
