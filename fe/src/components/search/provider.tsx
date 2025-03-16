@@ -39,7 +39,14 @@ export function useRefetchContext() {
     );
   }
 
-  return data;
+  return {
+    orderBy: data.orderBy,
+    page: data.page,
+    setSearchParams: data.setSearchParams,
+    sortOrder: data.sortOrder,
+    take: data.take,
+    search: '',
+  };
 }
 
 export function RefetchProvider(props: PropsWithChildren) {

@@ -51,7 +51,11 @@ export function useSearchQuery() {
 
   const query = useQuery({
     queryKey: [NOTE_QUERY_KEY],
-    queryFn: () => searchNotes({ session, ...data }),
+    queryFn: () =>
+      searchNotes({
+        session,
+        ...data,
+      }),
   });
 
   return query;
