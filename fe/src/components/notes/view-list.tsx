@@ -3,7 +3,6 @@ import { useSearchQuery } from "../search/query";
 import { ViewNote } from "./view";
 import { NoteSkeletonList } from "./skeleton";
 import { PaginateNotes } from "./paginate";
-import { PropsWithChildren } from "react";
 import { SectionFullPage } from "./utils";
 
 export function ViewNoteList() {

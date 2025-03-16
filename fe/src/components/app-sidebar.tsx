@@ -1,4 +1,4 @@
-import { NavLink, useLocation, useResolvedPath } from "react-router";
+import { NavLink, useLocation } from "react-router";
 import {
   Sidebar,
   SidebarContent,

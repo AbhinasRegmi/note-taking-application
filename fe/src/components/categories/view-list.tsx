@@ -10,12 +10,6 @@ import { PaginateNotes } from "../notes/paginate";
 import { Badge } from "../ui/badge";
 import { Link } from "react-router";
 import { X } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../ui/tooltip";
 import { useAuthContext } from "@/providers/auth";
 
 export function ViewCategoriesList() {
