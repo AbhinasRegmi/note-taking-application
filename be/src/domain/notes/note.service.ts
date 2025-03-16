@@ -34,7 +34,12 @@ export class NoteService {
           take: query.take,
         });
 
-        return response;
+        const responseSimpleCategory = response.map((res) => ({
+          ...res,
+          categories: res.categories.map((category) => category.name),
+        }));
+
+        return responseSimpleCategory;
       } else {
         // according to prisma docs there is performance issue with full text search with postgres when using prisma query
         // so i am doing a raw query here it is still sanitized by prisma to avoid injections
