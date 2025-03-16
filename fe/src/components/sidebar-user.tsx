@@ -13,16 +13,18 @@ import {
 } from "./ui/dropdown-menu";
 import { Avatar } from "./ui/avatar";
 import { AvatarFallback } from "@radix-ui/react-avatar";
-import { BadgeCheck, ChevronsUpDown, LogOut } from "lucide-react";
+import { ChevronsUpDown } from "lucide-react";
 import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@radix-ui/react-dropdown-menu";
-import { NavLink } from "react-router";
 import { useState } from "react";
+import { useNavigate } from "react-router";
 
 export function SidebarUser() {
+  const navigate = useNavigate();
+  const { logout } = useAuthContext();
   const { isMobile } = useSidebar();
   const [open, setOpen] = useState(false);
 
@@ -54,14 +56,14 @@ export function SidebarUser() {
             <DropdownMenuSeparator />
             <DropdownMenuGroup className="py-1.5 space-y-1">
               <DropdownMenuItem className="px-2 py-2 rounded-sm hover:bg-sidebar-accent">
-                <NavLink to={""} onClick={() => setOpen(false)}>
-                  <p className="text-xs font-semibold">Manage Account</p>
-                </NavLink>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="px-2 py-2 rounded-sm hover:bg-sidebar-accent">
-                <NavLink to={"#"} onClick={() => setOpen(false)}>
-                  <p className="text-xs font-semibold">Logout</p>
-                </NavLink>
+                <div
+                  onClick={() => {
+                    logout();
+                    navigate("/auth/login");
+                  }}
+                >
+                  <p className="text-xs font-semibold select-none">Logout</p>
+                </div>
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>

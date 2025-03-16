@@ -23,7 +23,7 @@ const menuItems = [
   },
   {
     name: "Categories",
-    link: "#",
+    link: "/catgories",
     icon: Bookmark,
     onclick: () => console.log("clicked"),
   },
