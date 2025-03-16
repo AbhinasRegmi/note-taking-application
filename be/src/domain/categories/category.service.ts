@@ -12,10 +12,7 @@ export class CategoryService {
 
   constructor(private readonly db: PrismaService) {}
 
-  async filterNotes(
-    userId: number,
-    categories: string[],
-  ) {
+  async filterNotes(userId: number, categories: string[]) {
     try {
       const response = await this.db.note.findMany({
         where: {
@@ -37,7 +34,13 @@ export class CategoryService {
         },
       });
 
-      return response;
+      const cleanResponse = response.map(({ categories, ...rest }) => ({
+        ...rest,
+        categories: categories.map((i) => i.name),
+      }));
+        
+      return cleanResponse;
+
     } catch (e) {
       this.logger.error(e);
 
@@ -53,13 +56,27 @@ export class CategoryService {
           name: {
             contains: query.search,
             mode: 'insensitive',
-          }
+          },
+        },
+        select: {
+          id: true,
+          name: true,
+          _count: {
+            select: {
+              notes: true,
+            },
+          },
         },
         skip: query.page * query.take,
         take: query.take,
       });
 
-      return response;
+      const cleanResponse = response.map(({ _count, ...rest }) => ({
+        ...rest,
+        count: _count.notes,
+      }));
+
+      return cleanResponse;
     } catch (e) {
       this.logger.error(e);
 

@@ -5,6 +5,7 @@ import {
   Inject,
   Injectable,
   Logger,
+  Redirect,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
@@ -111,8 +112,6 @@ export class AuthService {
     const stringToHash = `${data}-${expiryUtc}-${this.config.get('auth.secretKey')}`;
     const newHash = createHash('md5').update(stringToHash).digest('base64url');
     const expiryDate = new Date(Number(expiryUtc));
-    
-    
 
     if (newHash == signedHash && expiryDate.getTime() > Date.now()) {
       return true;
@@ -120,8 +119,11 @@ export class AuthService {
 
     return false;
   }
-  
-  async generateVerificationLink(email: string, baseConfigUrl: string = 'auth.verificationLinkBaseUrl') {
+
+  async generateVerificationLink(
+    email: string,
+    baseConfigUrl: string = 'auth.verificationLinkBaseUrl',
+  ) {
     // Warning: this shouldn't be called from any controller. Only from notification or other services
     try {
       const user = await this.userService.findOneByEmail(email);
@@ -152,18 +154,18 @@ export class AuthService {
     if (!this.vaildateSignedToken(query.data, query.expiry, query.token)) {
       throw new HttpException('Url is no longer valid', HttpStatus.BAD_REQUEST);
     }
-    
+
     const response = this.db.singleSignInToken.delete({
       where: {
-        token: query.token, 
-      }
+        token: query.token,
+      },
     });
-    
-    if(!response){
+
+    if (!response) {
       return {
         success: false,
-        message: 'Token already used. Please generate a new one.',
-      }
+        message: 'Link already expired. Please generate a new link.',
+      };
     }
 
     await this.userService.updateVerifiedAt(+query.data, true);
@@ -173,20 +175,27 @@ export class AuthService {
       message: 'Please login to gain access',
     };
   }
-  
-  async loginSst(query: AuthQueryDto){
+
+  async loginSst(query: AuthQueryDto) {
     const response = await this.verifyAccount(query);
-    
-    if(response.success){
+
+    if (!response) {
+      throw new HttpException('', 500);
+    }
+
+    if (response.success) {
       const session = await this.createSessionTokenFor(+query.data);
-      
+
       return {
         success: true,
-        value: session,
+        value: session.token,
       };
     }
-    
-    return response;
+
+    return {
+      success: false,
+      message: response.message,
+    };
   }
 
   async logout(loggedUser: UserT) {

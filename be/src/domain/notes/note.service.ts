@@ -193,6 +193,7 @@ offset ${query.take * query.page}
 
   async update(id: number, noteDto: UpdateNoteDto, userId: number) {
     try {
+      //TODO: fix a bug categories cannot be deleted here...
       const response = await this.db.note.update({
         where: {
           id,
