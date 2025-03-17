@@ -193,31 +193,42 @@ offset ${query.take * query.page}
 
   async update(id: number, noteDto: UpdateNoteDto, userId: number) {
     try {
-      //TODO: fix a bug categories cannot be deleted here...
-      const response = await this.db.note.update({
-        where: {
-          id,
-        },
-        data: {
-          title: noteDto.title,
-          slug: noteDto.slug ?? slugify(noteDto.title),
-          content: noteDto.content,
-          categories: {
-            connectOrCreate: noteDto.categories?.map((category) => ({
-              where: {
-                name_userId: {
+      const [_, response] = await this.db.$transaction([
+        this.db.note.update({
+          where: {
+            id,
+          },
+          data: {
+            categories: {
+              set: [],
+            },
+          },
+        }),
+        this.db.note.update({
+          where: {
+            id,
+          },
+          data: {
+            title: noteDto.title,
+            slug: noteDto.slug ?? slugify(noteDto.title),
+            content: noteDto.content,
+            categories: {
+              connectOrCreate: noteDto.categories?.map((category) => ({
+                where: {
+                  name_userId: {
+                    name: category,
+                    userId,
+                  },
+                },
+                create: {
                   name: category,
                   userId,
                 },
-              },
-              create: {
-                name: category,
-                userId,
-              },
-            })),
+              })),
+            },
           },
-        },
-      });
+        }),
+      ]);
 
       return response;
     } catch (e) {
