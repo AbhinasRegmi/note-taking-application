@@ -9,11 +9,6 @@ export class CreateNoteDto {
 
   @ApiProperty()
   @IsString()
-  @IsOptional()
-  slug: string;
-
-  @ApiProperty()
-  @IsString()
   @IsNotEmpty()
   content: string;
 

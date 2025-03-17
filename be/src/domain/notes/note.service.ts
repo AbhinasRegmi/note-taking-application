@@ -107,7 +107,12 @@ offset ${query.take * query.page}
         throw new HttpException('Note not found', HttpStatus.NOT_FOUND);
       }
 
-      return response;
+      const categories = response.categories.map((i) => i.name);
+
+      return {
+        ...response,
+        categories,
+      };
     } catch (e) {
       if (e instanceof HttpException) {
         throw e;
@@ -141,7 +146,12 @@ offset ${query.take * query.page}
         throw new HttpException('Note not found', HttpStatus.NOT_FOUND);
       }
 
-      return response;
+      const categories = response.categories.map((i) => i.name);
+
+      return {
+        ...response,
+        categories,
+      };
     } catch (e) {
       if (e instanceof HttpException) {
         throw e;
@@ -160,7 +170,7 @@ offset ${query.take * query.page}
       const response = await this.db.note.create({
         data: {
           title: noteDto.title,
-          slug: noteDto.slug ?? slugify(noteDto.title),
+          slug: slugify(noteDto.title),
           content: noteDto.content,
           userId: user.userId,
           categories: {
@@ -179,8 +189,11 @@ offset ${query.take * query.page}
           },
         },
       });
-
-      return response;
+      
+      return {
+        ...response,
+        categories: noteDto.categories ?? []
+      }
     } catch (e) {
       this.logger.error(e);
 
@@ -210,7 +223,7 @@ offset ${query.take * query.page}
           },
           data: {
             title: noteDto.title,
-            slug: noteDto.slug ?? slugify(noteDto.title),
+            slug: slugify(noteDto.title),
             content: noteDto.content,
             categories: {
               connectOrCreate: noteDto.categories?.map((category) => ({
@@ -227,10 +240,21 @@ offset ${query.take * query.page}
               })),
             },
           },
+          include: {
+            categories: {
+              select: {
+                name: true,
+              },
+            },
+          },
         }),
       ]);
 
-      return response;
+      const categories = response.categories.map((i) => i.name);
+      return {
+        ...response,
+        categories,
+      };
     } catch (e) {
       this.logger.error(e);
 
@@ -255,7 +279,7 @@ offset ${query.take * query.page}
 
       throw new HttpException(
         'Cannot delete note. Try again later.',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        HttpStatus.CONFLICT,
       );
     }
   }
