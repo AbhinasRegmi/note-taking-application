@@ -4,14 +4,14 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "./ui/sidebar";
+} from "../ui/sidebar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
   DropdownMenuLabel,
-} from "./ui/dropdown-menu";
-import { Avatar } from "./ui/avatar";
+} from "../ui/dropdown-menu";
+import { Avatar } from "../ui/avatar";
 import { AvatarFallback } from "@radix-ui/react-avatar";
 import { ChevronsUpDown } from "lucide-react";
 import {

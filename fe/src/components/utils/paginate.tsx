@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useRefetchContext } from "../search/notes";
+import { useRefetchContext } from "../../providers/notes";
 import {
   Pagination,
   PaginationContent,

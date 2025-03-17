@@ -1,4 +1,4 @@
-import { LoadingSpinner } from "@/components/spinner";
+import { LoadingSpinner } from "@/components/utils/spinner";
 import { ROUTES } from "@/constants/routes";
 import { useLocalStorage } from "@/hooks/use-localStorage";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";

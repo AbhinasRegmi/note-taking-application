@@ -8,7 +8,7 @@ import { SignupPage } from "./pages/auth/signup";
 import { ForgotPassword } from "./pages/auth/forgot-password";
 import { RootLayout } from "./layouts/root";
 import { CategoryPage } from "./pages/category";
-import { CategoryNamePage } from "./components/categories/name";
+import { CategoryNamePage } from "./pages/category-name";
 
 const client = new QueryClient();
 

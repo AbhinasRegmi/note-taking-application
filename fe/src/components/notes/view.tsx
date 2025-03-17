@@ -18,7 +18,6 @@ import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { Dialog, DialogContent } from "@radix-ui/react-dialog";
 import { useAuthContext } from "@/providers/auth";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, X } from "lucide-react";
 import {
   Tooltip,
@@ -26,11 +25,8 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "../ui/tooltip";
-import { ROUTES } from "@/constants/routes";
-import { toast } from "sonner";
-import { NOTE_QUERY_KEY } from "../search/notes";
 import { CategoryBadge, CategoryForm, TimeFromNow } from "./utils";
-import { CATEGORY_QUERY_KEY } from "../search/category";
+import { useFormDelete, useFormUpdate } from "@/hooks/use-form";
 
 interface viewNoteProps {
   id: string;
@@ -284,151 +280,4 @@ function EditNoteForm(
       </Form>
     </div>
   );
-}
-
-interface updateNoteProps {
-  title: string;
-  content: string;
-  categories: string[];
-  id: string;
-  session: string;
-}
-async function updateNote(props: updateNoteProps) {
-  try {
-    const response = await fetch(
-      `${ROUTES.backend.baseUrl}/notes/${props.id}`,
-      {
-        method: "PATCH",
-
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${props.session}`,
-        },
-        body: JSON.stringify({
-          title: props.title,
-          content: props.content,
-          categories: props.categories,
-        }),
-      }
-    );
-
-    const body = await response.json();
-
-    if (response.status == 200) {
-      return {
-        ok: true,
-        message: "Your note has been updated.",
-      };
-    }
-
-    if (response.status == 409) {
-      throw "Please change the title.";
-    }
-
-    if (response.status == 401) {
-      throw "You do not have access to update this note.";
-    }
-
-    throw body.message ?? "Try again later.";
-  } catch (e) {
-    throw e;
-  }
-}
-
-function useFormUpdate() {
-  const client = useQueryClient();
-  const mutation = useMutation({
-    mutationFn: updateNote,
-    onSuccess: (e) => {
-      toast.success(e.message);
-      client.invalidateQueries({
-        queryKey: [NOTE_QUERY_KEY],
-      });
-      client.invalidateQueries({
-        queryKey: [CATEGORY_QUERY_KEY],
-      });
-    },
-    onError: (e: string) => {
-      let error: string;
-      if (typeof e == "string") {
-        error = e;
-      } else {
-        error = "Please try again later";
-      }
-
-      toast.error("Uh! oh", {
-        description: error,
-      });
-    },
-  });
-
-  return mutation;
-}
-
-interface deleteNoteProps {
-  id: string;
-  session: string;
-}
-async function deleteNote(props: deleteNoteProps) {
-  try {
-    const response = await fetch(
-      `${ROUTES.backend.baseUrl}/notes/${props.id}`,
-      {
-        method: "DELETE",
-
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${props.session}`,
-        },
-      }
-    );
-
-    const body = await response.json();
-
-    if (response.status == 200) {
-      return {
-        ok: true,
-        message: "Your note has been deleted.",
-      };
-    }
-
-    if (response.status == 404) {
-      throw "Cannot delete the note.";
-    }
-
-    if (response.status == 401) {
-      throw "You do not have access to update this note.";
-    }
-
-    throw body.message ?? "Try again later.";
-  } catch (e) {
-    throw e;
-  }
-}
-
-function useFormDelete() {
-  const client = useQueryClient();
-  const mutation = useMutation({
-    mutationFn: deleteNote,
-    onSuccess: (e) => {
-      toast.success(e.message);
-      client.invalidateQueries({
-        queryKey: [NOTE_QUERY_KEY],
-      });
-    },
-    onError: (e: string) => {
-      let error: string;
-      if (typeof e == "string") {
-        error = e;
-      } else {
-        error = "Please try again later";
-      }
-
-      toast.error("Uh! Oh", {
-        description: error,
-      });
-    },
-  });
-
-  return mutation;
 }

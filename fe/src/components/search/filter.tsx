@@ -9,7 +9,7 @@ import {
   DropdownMenuRadioItem,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { useRefetchContext } from "./notes";
+import { useRefetchContext } from "../../providers/notes";
 import { useEffect, useState } from "react";
 import { Input } from "../ui/input";
 import { useLocation } from "react-router";

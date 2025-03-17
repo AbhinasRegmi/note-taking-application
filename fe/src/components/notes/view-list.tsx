@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils";
-import { useSearchQuery } from "../search/query";
+import { useSearchQuery } from "../../hooks/use-query";
 import { ViewNote } from "./view";
 import { NoteSkeletonList } from "./skeleton";
-import { PaginateNotes } from "./paginate";
+import { PaginateNotes } from "../utils/paginate";
 import { SectionFullPage } from "./utils";
 
 export function ViewNoteList() {

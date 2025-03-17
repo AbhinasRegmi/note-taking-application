@@ -1,6 +1,6 @@
 import { Separator } from "@radix-ui/react-separator";
-import { SidebarTrigger } from "./ui/sidebar";
-import { FilterNotes, SearchNotes } from "./search/filter";
+import { SidebarTrigger } from "../ui/sidebar";
+import { FilterNotes, SearchNotes } from "../search/filter";
 import { useLocation } from "react-router";
 
 export function AppNavbar() {

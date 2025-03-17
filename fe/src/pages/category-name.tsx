@@ -1,9 +1,9 @@
 import { useParams } from "react-router";
-import { useSearchNoteWithCategory } from "../search/query";
-import { NoteSkeletonList } from "../notes/skeleton";
-import { SectionFullPage } from "../notes/utils";
+import { useSearchNoteWithCategory } from "../hooks/use-query";
+import { NoteSkeletonList } from "../components/notes/skeleton";
+import { SectionFullPage } from "../components/notes/utils";
 import { cn } from "@/lib/utils";
-import { ViewNote } from "../notes/view";
+import { ViewNote } from "../components/notes/view";
 
 export function CategoryNamePage() {
   const { categoryName } = useParams();
