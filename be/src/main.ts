@@ -9,12 +9,13 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // setup cors
-  // allow all origin during dev
-  app.enableCors({
-    origin: '*',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    allowedHeaders: '*',
-  });
+  if (!process.env.PRODUCTION) {
+    app.enableCors({
+      origin: '*',
+      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+      allowedHeaders: '*',
+    });
+  }
 
   // setup swagger docs
   const config = new DocumentBuilder()

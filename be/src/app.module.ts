@@ -12,6 +12,9 @@ import { NoteModule } from './domain/notes/note.module';
 import { CategoryModule } from './domain/categories/category.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { EmailModule } from './common/notifications/email/email.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -22,6 +25,11 @@ import { EmailModule } from './common/notifications/email/email.module';
     PrismaModule,
     EventEmitterModule.forRoot(),
     EmailModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'client'),
+      renderPath: '*',
+      exclude: ['/api*'],
+    }),
     
     // routes
     AuthModule,
@@ -29,7 +37,9 @@ import { EmailModule } from './common/notifications/email/email.module';
     NoteModule,
     CategoryModule
   ],
-  controllers: [],
+  controllers: [
+    AppController,
+  ],
   providers: [
     {
       provide: APP_INTERCEPTOR,
