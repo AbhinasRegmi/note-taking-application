@@ -10,7 +10,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "./ui/sidebar";
+} from "@/components/ui/sidebar";
 import { Bookmark, FileText, Lightbulb } from "lucide-react";
 import { SidebarUser } from "./sidebar-user";
 

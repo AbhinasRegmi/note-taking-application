@@ -1,12 +1,12 @@
 import { cn } from "@/lib/utils";
 import {
-  categoriesResponse,
   useCategoriesQuery,
   useDeleteCategory,
-} from "../search/query";
+} from "../../hooks/use-query";
+import { categoriesResponse } from "@/requests/categories";
 import { CategoriesSkeletonList } from "./skeleton";
 import { PropsWithChildren } from "react";
-import { PaginateNotes } from "../notes/paginate";
+import { PaginateNotes } from "../utils/paginate";
 import { Badge } from "../ui/badge";
 import { Link } from "react-router";
 import { X } from "lucide-react";

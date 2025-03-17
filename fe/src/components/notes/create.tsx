@@ -8,11 +8,7 @@ import { Form, FormControl, FormField, FormItem } from "../ui/form";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { Plus, X } from "lucide-react";
-import { useMutation,  useQueryClient } from "@tanstack/react-query";
 import { useAuthContext } from "@/providers/auth";
-import { ROUTES } from "@/constants/routes";
-import { toast } from "sonner";
-import { NOTE_QUERY_KEY } from "../search/notes";
 import { CategoryBadge, CategoryForm } from "./utils";
 import {
   Tooltip,
@@ -20,7 +16,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
-import { CATEGORY_QUERY_KEY } from "../search/category";
+import { useCreateNoteQuery } from "@/hooks/use-query";
 
 export function TakeNote() {
   const [isTakingNote, setIsTakingNote] = useState(false);
@@ -58,77 +54,14 @@ const noteformSchema = z.object({
   content: z.string().min(2),
 });
 
-async function createNewNote(data: {
-  title: string;
-  content: string;
-  categories: string[];
-  session: string;
-}) {
-  try {
-    const response = await fetch(`${ROUTES.backend.baseUrl}/notes`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${data.session}`,
-      },
-      body: JSON.stringify({
-        title: data.title,
-        content: data.content,
-        categories: data.categories,
-      }),
-    });
-
-    const body = await response.json();
-
-    if (response.status === 201) {
-      return {
-        ok: true,
-        data: body,
-      };
-    }
-
-    if (response.status == 401) {
-      throw "You do not access to create notes. Try again after login";
-    }
-
-    throw body.message ?? "Try again with different title";
-  } catch (e) {
-    if (typeof e == "string") {
-      throw e;
-    }
-
-    throw "Something went wrong";
-  }
-}
-
 interface noteFormPros {
   handler: React.Dispatch<React.SetStateAction<boolean>>;
 }
 function NoteForm(props: noteFormPros) {
   const { session } = useAuthContext();
+  const mutation = useCreateNoteQuery(props.handler);
   const [categoryArray, setCategoryArray] = useState<string[]>([]);
   const [openCategoryForm, setOpenCategoryForm] = useState(false);
-
-  const client = useQueryClient();
-
-  const mutation = useMutation({
-    mutationFn: createNewNote,
-    onSuccess: () => {
-      toast.success("New note has been added.");
-      client.invalidateQueries({
-        queryKey: [NOTE_QUERY_KEY],
-      });
-      client.invalidateQueries({
-        queryKey: [CATEGORY_QUERY_KEY],
-      });
-      props.handler(false);
-    },
-    onError: (e: string) => {
-      toast.error("Uh! oh There is an error", {
-        description: e,
-      });
-    },
-  });
 
   const form = useForm<z.infer<typeof noteformSchema>>({
     resolver: zodResolver(noteformSchema),

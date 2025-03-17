@@ -4,7 +4,7 @@ import { PropsWithChildren, useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { searchCategoriesWithMissingGlobalScope } from "@/requests/categories";
 import { Input } from "../ui/input";
-import { CATEGORY_QUERY_KEY } from "../search/category";
+import { CATEGORY_QUERY_KEY } from "../../providers/category";
 import { humanizeDate } from "@/lib/date";
 
 export function CategoryBadge(props: {
