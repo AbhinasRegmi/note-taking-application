@@ -1,0 +1,48 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - prod
+  pull_request:
+    branches:
+      - prod
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Dependencies for NestJS
+        run: |
+          cd be 
+          npm install
+
+      - name: Build NestJS App
+        run: |
+          cd be 
+          npm run build
+
+      - name: Install Dependencies for React
+        run: |
+          cd fe 
+          npm install
+
+      - name: Build React App
+        run: |
+          cd fe 
+          npm run build
+
+      - name: Archive Production Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: built-app
+          path: be/client
