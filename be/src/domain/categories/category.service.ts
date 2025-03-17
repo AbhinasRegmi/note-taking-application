@@ -2,7 +2,6 @@ import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { response } from 'express';
 import { SearchCategoryQuery } from './dto/query.dto';
 
 @Injectable()
@@ -148,10 +147,7 @@ export class CategoryService {
         },
         data: {
           name: categoryDto.name,
-        },
-        include: {
-          notes: true,
-        },
+        }
       });
 
       return response;
@@ -167,7 +163,7 @@ export class CategoryService {
 
   async delete(categoryId: number) {
     try {
-      await this.db.category.delete({
+      const response = await this.db.category.delete({
         where: {
           id: categoryId,
         },
