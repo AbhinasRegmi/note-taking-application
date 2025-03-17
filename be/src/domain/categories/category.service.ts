@@ -1,9 +1,9 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { response } from 'express';
+import { SearchCategoryQuery } from './dto/query.dto';
 
 @Injectable()
 export class CategoryService {
@@ -11,10 +11,7 @@ export class CategoryService {
 
   constructor(private readonly db: PrismaService) {}
 
-  async filterNotes(
-    userId: number,
-    categories: string[],
-  ) {
+  async filterNotes(userId: number, categories: string[]) {
     try {
       const response = await this.db.note.findMany({
         where: {
@@ -36,7 +33,13 @@ export class CategoryService {
         },
       });
 
-      return response;
+      const cleanResponse = response.map(({ categories, ...rest }) => ({
+        ...rest,
+        categories: categories.map((i) => i.name),
+      }));
+        
+      return cleanResponse;
+
     } catch (e) {
       this.logger.error(e);
 
@@ -44,17 +47,22 @@ export class CategoryService {
     }
   }
 
-  async findAll(userId: number, query: PaginationDto) {
+  async findAll(userId: number, query: SearchCategoryQuery) {
     try {
       const response = await this.db.category.findMany({
         where: {
           userId,
+          name: {
+            contains: query.search,
+            mode: 'insensitive',
+          },
         },
-        include: {
-          notes: {
+        select: {
+          id: true,
+          name: true,
+          _count: {
             select: {
-              title: true,
-              id: true,
+              notes: true,
             },
           },
         },
@@ -62,7 +70,12 @@ export class CategoryService {
         take: query.take,
       });
 
-      return response;
+      const cleanResponse = response.map(({ _count, ...rest }) => ({
+        ...rest,
+        count: _count.notes,
+      }));
+
+      return cleanResponse;
     } catch (e) {
       this.logger.error(e);
 

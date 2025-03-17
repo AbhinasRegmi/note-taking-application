@@ -1,35 +1,42 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter, Route, Routes } from "react-router";
+import { BaseLayout } from "./layouts/base";
+import { HomePage } from "./pages/home";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { LoginPage } from "./pages/auth/login";
+import { PublicLayout } from "./layouts/public";
+import { SignupPage } from "./pages/auth/signup";
+import { ForgotPassword } from "./pages/auth/forgot-password";
+import { RootLayout } from "./layouts/root";
+import { CategoryPage } from "./pages/category";
+import { CategoryNamePage } from "./components/categories/name";
 
-function App() {
-  const [count, setCount] = useState(0)
+const client = new QueryClient();
 
+export default function App() {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <QueryClientProvider client={client}>
+      <BrowserRouter>
+        <Routes>
+          <Route element={<RootLayout />}>
+            {/* Auth Routes */}
+            <Route element={<BaseLayout />}>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/categories" element={<CategoryPage />} />
+              <Route path="/categories/:categoryName" element={<CategoryNamePage />} />
+            </Route>
 
-export default App
+            {/* Public Routes */}
+            <Route element={<PublicLayout />}>
+              <Route path="/auth/signup" element={<SignupPage />} />
+              <Route path="/auth/login" element={<LoginPage />} />
+              <Route
+                path="/auth/forgot-password"
+                element={<ForgotPassword />}
+              />
+            </Route>
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
+}
