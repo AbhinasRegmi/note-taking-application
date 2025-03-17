@@ -34,7 +34,12 @@ export class NoteService {
           take: query.take,
         });
 
-        return response;
+        const responseSimpleCategory = response.map((res) => ({
+          ...res,
+          categories: res.categories.map((category) => category.name),
+        }));
+
+        return responseSimpleCategory;
       } else {
         // according to prisma docs there is performance issue with full text search with postgres when using prisma query
         // so i am doing a raw query here it is still sanitized by prisma to avoid injections
@@ -188,30 +193,42 @@ offset ${query.take * query.page}
 
   async update(id: number, noteDto: UpdateNoteDto, userId: number) {
     try {
-      const response = await this.db.note.update({
-        where: {
-          id,
-        },
-        data: {
-          title: noteDto.title,
-          slug: noteDto.slug ?? slugify(noteDto.title),
-          content: noteDto.content,
-          categories: {
-            connectOrCreate: noteDto.categories?.map((category) => ({
-              where: {
-                name_userId: {
+      const [_, response] = await this.db.$transaction([
+        this.db.note.update({
+          where: {
+            id,
+          },
+          data: {
+            categories: {
+              set: [],
+            },
+          },
+        }),
+        this.db.note.update({
+          where: {
+            id,
+          },
+          data: {
+            title: noteDto.title,
+            slug: noteDto.slug ?? slugify(noteDto.title),
+            content: noteDto.content,
+            categories: {
+              connectOrCreate: noteDto.categories?.map((category) => ({
+                where: {
+                  name_userId: {
+                    name: category,
+                    userId,
+                  },
+                },
+                create: {
                   name: category,
                   userId,
                 },
-              },
-              create: {
-                name: category,
-                userId,
-              },
-            })),
+              })),
+            },
           },
-        },
-      });
+        }),
+      ]);
 
       return response;
     } catch (e) {

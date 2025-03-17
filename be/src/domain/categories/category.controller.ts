@@ -17,7 +17,7 @@ import { User } from 'src/common/decorators/user.decorator';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { CategoryQuery } from './dto/query.dto';
+import { CategoryQuery, SearchCategoryQuery } from './dto/query.dto';
 
 @Controller({
   path: 'categories',
@@ -31,7 +31,7 @@ export class CategoryController {
   })
   @ApiBearerAuth()
   @Get()
-  async findAll(@Query() query: PaginationDto, @User() loggedUser: UserT) {
+  async findAll(@Query() query: SearchCategoryQuery, @User() loggedUser: UserT) {
     return await this.categoryService.findAll(loggedUser.userId, query);
   }
 

@@ -7,6 +7,8 @@ import { PublicLayout } from "./layouts/public";
 import { SignupPage } from "./pages/auth/signup";
 import { ForgotPassword } from "./pages/auth/forgot-password";
 import { RootLayout } from "./layouts/root";
+import { CategoryPage } from "./pages/category";
+import { CategoryNamePage } from "./components/categories/name";
 
 const client = new QueryClient();
 
@@ -16,10 +18,11 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route element={<RootLayout />}>
-
             {/* Auth Routes */}
             <Route element={<BaseLayout />}>
               <Route path="/" element={<HomePage />} />
+              <Route path="/categories" element={<CategoryPage />} />
+              <Route path="/categories/:categoryName" element={<CategoryNamePage />} />
             </Route>
 
             {/* Public Routes */}
@@ -27,7 +30,7 @@ export default function App() {
               <Route path="/auth/signup" element={<SignupPage />} />
               <Route path="/auth/login" element={<LoginPage />} />
               <Route
-                path="/auth/forgot-password/:token?"
+                path="/auth/forgot-password"
                 element={<ForgotPassword />}
               />
             </Route>

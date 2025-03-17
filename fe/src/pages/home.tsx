@@ -1,3 +1,11 @@
+import { TakeNote } from "@/components/notes/take";
+import { ViewNoteList } from "@/components/notes/view-list";
+
 export function HomePage() {
-  return <div>hello world</div>;
+  return (
+    <section>
+      <TakeNote />
+      <ViewNoteList />
+    </section>
+  );
 }

@@ -7,4 +7,5 @@ export const core = {
   docsPath: env('DEFAULT_DOCS_PATH', 'docs'),
   defaultVersion: env('DEFAULT_APP_VERSION', '1'),
   tokenType: 'Bearer',
+  frontendUrl: env('FRONTEND_BASE_URL', 'http://localhost:3000'),
 };
