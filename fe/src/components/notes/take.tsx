@@ -223,6 +223,7 @@ function NoteForm(props: noteFormPros) {
             <div className="px-3 flex items-center justify-end">
               {form.formState.isValid ? (
                 <Button
+                  disabled={mutation.isPending}
                   type="submit"
                   key="submit"
                   size={"sm"}

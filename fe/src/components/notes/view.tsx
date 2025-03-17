@@ -253,6 +253,7 @@ function EditNoteForm(
               variant={"destructive"}
               size={"sm"}
               key={"delete"}
+              disabled={deleteQuery.isPending}
               onClick={handleDelete}
             >
               Delete
@@ -263,6 +264,7 @@ function EditNoteForm(
                 key="submit"
                 size={"sm"}
                 variant={"secondary"}
+                disabled={updateQuery.isPending}
               >
                 Update
               </Button>

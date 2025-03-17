@@ -97,7 +97,6 @@ function LoginForm() {
     mutationFn: LoginUser,
     onSuccess: (data) => {
       if (data?.token) {
-        console.log(data.token);
         setSession(data.token);
       }
       navigate("/");
@@ -153,7 +152,11 @@ function LoginForm() {
                 </div>
               </FormLabel>
               <FormControl>
-                <Input placeholder="**************" {...field} />
+                <Input
+                  type="password"
+                  placeholder="**************"
+                  {...field}
+                />
               </FormControl>
               <FormDescription>Enter your secure password</FormDescription>
               <FormMessage />
@@ -161,7 +164,7 @@ function LoginForm() {
           )}
         />
 
-        <Button type="submit" className="w-full">
+        <Button disabled={mutation.isPending} type="submit" className="w-full">
           Login
         </Button>
 

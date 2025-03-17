@@ -81,7 +81,7 @@ function ViewCategory(props: categoriesResponse) {
 
   if (canDelete) {
     return (
-      <Badge className="text-sm group">
+      <Badge className={cn("text-sm group", mutate.isPending && "opacity-80")}>
         <strong>{props.name}</strong>{" "}
         <span className="text-xs group-hover:hidden">{props.count}</span>
         <div className="hidden group-hover:inline-block cursor-pointer">

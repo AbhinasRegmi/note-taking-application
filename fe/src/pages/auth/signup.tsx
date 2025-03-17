@@ -78,14 +78,12 @@ async function SignupUser(data: {
     if (response.status === 201) {
       return {
         ok: true,
-      }
+      };
     }
-    
+
     const error = await response.json();
     throw error;
-
   } catch (e) {
-    console.log(e);
     throw e;
   }
 }
@@ -102,7 +100,7 @@ function SignupForm() {
       toast.success("User signup successfull.", {
         description: "An email verification link has been sent.",
       });
-      navigate('/auth/login');
+      navigate("/auth/login");
     },
     onError: () => {
       toast.error("User cannot be created", {
@@ -151,7 +149,11 @@ function SignupForm() {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input placeholder="**************" {...field} />
+                <Input
+                  type="password"
+                  placeholder="**************"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -165,7 +167,11 @@ function SignupForm() {
             <FormItem>
               <FormLabel>Confirm Password</FormLabel>
               <FormControl>
-                <Input placeholder="**************" {...field} />
+                <Input
+                  type="password"
+                  placeholder="**************"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
