@@ -200,6 +200,7 @@ async function searchNoteWithCategory(props: {
         title: string;
         content: string;
         id: string;
+        updatedAt: string;
         categories: string[];
       }[];
     }
