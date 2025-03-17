@@ -29,13 +29,14 @@ import {
 import { ROUTES } from "@/constants/routes";
 import { toast } from "sonner";
 import { NOTE_QUERY_KEY } from "../search/notes";
-import { CategoryBadge, CategoryForm } from "./utils";
+import { CategoryBadge, CategoryForm, TimeFromNow } from "./utils";
 import { CATEGORY_QUERY_KEY } from "../search/category";
 
 interface viewNoteProps {
   id: string;
   title: string;
   content: string;
+  updatedAt: string;
   categories: string[];
 }
 export function ViewNote(props: viewNoteProps) {
@@ -95,6 +96,7 @@ function EditNoteView(
             title={props.title}
             content={props.content}
             categories={props.categories}
+            updatedAt={props.updatedAt}
             closeFormHandler={props.setDialogStatus}
           />
         </DialogContent>
@@ -145,7 +147,6 @@ function EditNoteForm(
   });
 
   function handleUpdate(data: z.infer<typeof noteformSchema>) {
-
     updateQuery.mutate({
       id: props.id,
       ...data,
@@ -168,115 +169,118 @@ function EditNoteForm(
   }, [updateQuery.isSuccess, deleteQuery.isSuccess, props.closeFormHandler]);
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleUpdate)}>
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Input
-                  className="shadow-none border-0 px-0 focus-visible:ring-0 dark:bg-background dark:text-foreground text-lg"
-                  placeholder="Title"
-                  {...field}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="content"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Textarea
-                  autoFocus
-                  className="shadow-none border-0 px-0 focus-visible:ring-0 dark:bg-background dark:text-foreground"
-                  placeholder="Take a note..."
-                  {...field}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        <section className="py-4 flex items-end justify-between">
-          <div className="grow shrink-0 flex flex-wrap w-3/4">
-            {categoryArray.map((category) => (
-              <span key={category} className="p-1">
-                <CategoryBadge
-                  categoryName={category}
-                  setCategoryArray={setCategoryArray}
-                />
-              </span>
-            ))}
-          </div>
-          {openCategoryForm ? (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <X
-                    className="cursor-pointer hover:bg-accent rounded-full"
-                    onClick={() => setOpenCategoryForm((p) => !p)}
+    <div>
+      <TimeFromNow datetime={props.updatedAt} />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleUpdate)}>
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input
+                    className="shadow-none border-0 px-0 focus-visible:ring-0 dark:bg-background dark:text-foreground text-lg"
+                    placeholder="Title"
+                    {...field}
                   />
-                </TooltipTrigger>
-                <TooltipContent>close category form</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          ) : (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Plus
-                    className="cursor-pointer hover:bg-accent rounded-full"
-                    onClick={() => setOpenCategoryForm((p) => !p)}
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="content"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Textarea
+                    autoFocus
+                    className="shadow-none border-0 px-0 focus-visible:ring-0 dark:bg-background dark:text-foreground"
+                    placeholder="Take a note..."
+                    {...field}
                   />
-                </TooltipTrigger>
-                <TooltipContent>Add Categories</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          <section className="py-4 flex items-end justify-between">
+            <div className="grow shrink-0 flex flex-wrap w-3/4">
+              {categoryArray.map((category) => (
+                <span key={category} className="p-1">
+                  <CategoryBadge
+                    categoryName={category}
+                    setCategoryArray={setCategoryArray}
+                  />
+                </span>
+              ))}
+            </div>
+            {openCategoryForm ? (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <X
+                      className="cursor-pointer hover:bg-accent rounded-full"
+                      onClick={() => setOpenCategoryForm((p) => !p)}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>close category form</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Plus
+                      className="cursor-pointer hover:bg-accent rounded-full"
+                      onClick={() => setOpenCategoryForm((p) => !p)}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>Add Categories</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </section>
+
+          {openCategoryForm && (
+            <CategoryForm setCategoryArray={setCategoryArray} />
           )}
-        </section>
 
-        {openCategoryForm && (
-          <CategoryForm setCategoryArray={setCategoryArray} />
-        )}
-
-        <div className="flex items-center justify-between">
-          <Button
-            type="button"
-            variant={"destructive"}
-            size={"sm"}
-            key={"delete"}
-            onClick={handleDelete}
-          >
-            Delete
-          </Button>
-          {form.formState.isValid ? (
+          <div className="flex items-center justify-between">
             <Button
-              type="submit"
-              key="submit"
-              size={"sm"}
-              variant={"secondary"}
-            >
-              Update
-            </Button>
-          ) : (
-            <Button
-              size={"sm"}
-              variant={"secondary"}
-              onClick={() => props.closeFormHandler(false)}
               type="button"
-              key="cancel"
+              variant={"destructive"}
+              size={"sm"}
+              key={"delete"}
+              onClick={handleDelete}
             >
-              Cancel
+              Delete
             </Button>
-          )}
-        </div>
-      </form>
-    </Form>
+            {form.formState.isValid ? (
+              <Button
+                type="submit"
+                key="submit"
+                size={"sm"}
+                variant={"secondary"}
+              >
+                Update
+              </Button>
+            ) : (
+              <Button
+                size={"sm"}
+                variant={"secondary"}
+                onClick={() => props.closeFormHandler(false)}
+                type="button"
+                key="cancel"
+              >
+                Cancel
+              </Button>
+            )}
+          </div>
+        </form>
+      </Form>
+    </div>
   );
 }
 

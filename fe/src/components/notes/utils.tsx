@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { searchCategoriesWithMissingGlobalScope } from "@/requests/categories";
 import { Input } from "../ui/input";
 import { CATEGORY_QUERY_KEY } from "../search/category";
+import { humanizeDate } from "@/lib/date";
 
 export function CategoryBadge(props: {
   categoryName: string;
@@ -29,7 +30,6 @@ export function CategoryBadge(props: {
   );
 }
 
-
 export function CategoryForm(props: {
   setCategoryArray: React.Dispatch<React.SetStateAction<string[]>>;
 }) {
@@ -39,7 +39,8 @@ export function CategoryForm(props: {
 
   const query = useQuery({
     queryKey: [CATEGORY_QUERY_KEY],
-    queryFn: async () => await searchCategoriesWithMissingGlobalScope(search, session),
+    queryFn: async () =>
+      await searchCategoriesWithMissingGlobalScope(search, session),
   });
 
   function handleSubmit(searchText: string) {
@@ -81,7 +82,7 @@ export function CategoryForm(props: {
 
       <section className="w-full max-w-sm mx-auto pt-4">
         {search !== "" &&
-          query.data?.map((i: {name: string}) => (
+          query.data?.map((i: { name: string }) => (
             <span key={i.name} className="px-2 inline-block py-1 opacity-40">
               <Badge
                 onClick={() => {
@@ -109,6 +110,14 @@ export function SectionFullPage(props: PropsWithChildren) {
   return (
     <div className="min-h-[80vh] flex flex-col items-center justify-between p-8">
       {props.children}
+    </div>
+  );
+}
+
+export function TimeFromNow(props: { datetime: string }) {
+  return (
+    <div className="text-xs px-2 text-end opacity-60">
+      Edited {humanizeDate(props.datetime)}
     </div>
   );
 }

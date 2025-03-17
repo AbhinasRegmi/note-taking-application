@@ -16,6 +16,7 @@ type noteResponse = {
   id: string;
   title: string;
   content: string;
+  updatedAt: string;
   categories: string[];
 };
 async function searchNotes(props: searchNotesProps) {
