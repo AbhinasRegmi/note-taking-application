@@ -2,7 +2,7 @@ export function humanizeDate(datetime: string): string {
 
   const date = new Date(datetime);
   const now = Date.now();
-  const delta = Math.round((now - date.getTime()) / 1000);
+  const delta = Math.round((now - date.getTime()) / 1000); // in seconds
 
   const minute = 60;
   const hour = minute * 60;
@@ -30,7 +30,7 @@ export function humanizeDate(datetime: string): string {
   }
   
   if(delta < day){
-    const number = Math.floor(delta / minute);
+    const number = Math.floor(delta / hour);
 
     if(number == 1){
       return '1 hour ago';
@@ -40,33 +40,33 @@ export function humanizeDate(datetime: string): string {
   }
   
   if(delta < week){
-    const number = Math.floor(delta / minute);
+    const number = Math.floor(delta / day);
 
     if(number == 1){
       return '1 day ago';
     }
 
-    return Math.floor(delta / day) + ' days ago';
+    return number + ' days ago';
   }
   
   if(delta < month){
-    const number = Math.floor(delta / minute);
+    const number = Math.floor(delta / week);
 
     if(number == 1){
       return '1 week ago';
     }
 
-    return Math.floor(delta / week) + ' weeks ago';
+    return number + ' weeks ago';
   }
   
   if(delta < year){
-    const number = Math.floor(delta / minute);
+    const number = Math.floor(delta / month);
 
     if(number == 1){
       return '1 month ago';
     }
 
-    return Math.floor(delta / month ) + ' months ago';
+    return month + ' months ago';
   }
   
   return Math.floor(delta / year) + ' years ago';
