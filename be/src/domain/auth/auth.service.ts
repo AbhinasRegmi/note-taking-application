@@ -7,7 +7,7 @@ import {
   Logger,
   Redirect,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from 'src/domain/prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import {
   CannotLogInError,
@@ -18,7 +18,7 @@ import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dtos/login.dto';
 import { UserT } from 'src/common/types/user.type';
 import { randomUUID, createHash } from 'node:crypto';
-import { AuthQueryDto, AuthVerificationQueryDto } from './dtos/auth-query.dto';
+import { AuthQueryDto } from './dtos/auth-query.dto';
 import { UsersService } from '../users/users.service';
 
 @Injectable()
