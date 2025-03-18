@@ -155,7 +155,7 @@ export class AuthService {
       throw new HttpException('Url is no longer valid', HttpStatus.BAD_REQUEST);
     }
 
-    const response = this.db.singleSignInToken.delete({
+    const response = await this.db.singleSignInToken.delete({
       where: {
         token: query.token,
       },
