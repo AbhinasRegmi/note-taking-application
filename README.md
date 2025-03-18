@@ -118,7 +118,7 @@ PRODUCTION=true npm run start
 
 - **Search**: Notes search is powered with `full-text-search` by `postgresql` which tokenizes key word and ranks the search for `title` and `content`.
 
-- **Loggin**: Backend has robust logging mechanism for `errors`, `info` and every `request` accepted by the server with `request path` and `method` accessed by the request. 
+- **Logging**: Backend has robust logging mechanism for `errors`, `info` and every `request` accepted by the server with `request path` and `method` accessed by the request. 
 
 - **Asynchronous Event Driven Architecture**: Some features like `sending email` are decoupled from the contoller with `events` to have faster responses.
 
