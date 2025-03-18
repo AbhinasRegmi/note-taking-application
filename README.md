@@ -92,6 +92,7 @@ But for `production mode` we need to build the static assets and keep in `be/cli
 ```sh
 PRODUCTION=true npm run start
 ```
+The server starts at `http://localhost:8000`
 
 ## **Engineering Decisions**
 
